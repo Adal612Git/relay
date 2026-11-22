@@ -13,7 +13,7 @@ concurrency:
 jobs:
   quality:
     name: Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
       - run: npm run check:files
   unit:
     name: Unit Tests (SDK doubles)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
           retention-days: 7
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
           retention-days: 7
   browser:
     name: Browser Tests (manual, no Firebase)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

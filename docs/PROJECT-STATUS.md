@@ -13,11 +13,21 @@ This branch implements an independently testable MVP increment. It is **not** a 
 - Real App Check `getToken` prerequisite. No debug-token path, original-note cloud fallback, testing switch or fake production model.
 - Four-job CI: quality, unit/component/SDK doubles, production build and Chromium manual E2E. Reports/build artifacts retained seven days. PR updates and pushes to main run CI; branch pushes do not duplicate the PR run.
 
+## GitHub Actions evidence
+
+First run: [45060135078](https://github.com/Adal612Git/relay/actions/runs/45060135078), head `0b2cfae0918a3c997e2cfc201980c8f0aea87ec6`.
+
+Quality, Unit Tests and Build passed. Browser Tests failed **before running tests** because `ubuntu-latest` selected Ubuntu 26.04, unsupported by pinned Playwright 1.56.1. The workflow now pins Ubuntu 24.04 for a supported, repeatable runner. This failure is retained as evidence; final verification must use the subsequent run on the latest PR head.
+
 ## Observed local results
 
-TypeScript, production build, essential-file checks, unit/component tests, and Chromium E2E were run. The final exact test count and GitHub-hosted result are recorded in the Pull Request checks and execution evidence comment; local success does not imply remote CI success.
+TypeScript, production build, essential-file checks, 47 unit/component tests and 3 Chromium E2E tests passed. A fresh `npm ci` followed by production build and browser tests also passed. The final exact test count and GitHub-hosted result are recorded in the Pull Request checks and execution evidence comment; local success does not imply remote CI success.
 
 The browser suite verifies an actual clipboard write, denied-clipboard fallback, offline manual work, empty state after reload, no external requests during manual work, empty browser storage, keyboard activation, no horizontal overflow at 320 CSS px and an automated axe scan. These are targeted checks, not full WCAG certification.
+
+## Dependency review
+
+The first GitHub clean install reported seven dependency advisories. Vitest was updated to 4.1.12 (compatible with Vite 6 and Node 20); the transitive `@grpc/grpc-js` dependency was pinned to 1.14.7 via npm override rather than downgrading Firebase and losing the hybrid API. The Playwright core override keeps axe and the browser runner on the same tested types. A subsequent `npm audit --json` reported **0 vulnerabilities**. All 47 unit/component tests, three browser tests, TypeScript and build passed after these dependency changes. This is a point-in-time package audit, not a security certification.
 
 ## Real integration — BLOCKED
 
