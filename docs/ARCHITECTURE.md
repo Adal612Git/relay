@@ -33,3 +33,14 @@ The implementation is a starter. A real browser test must verify the SDK version
 ## State and retention
 
 All incident state is held in React component state only. There is no database, server, account system, or persistence layer in this MVP. The operating system clipboard has its own retention behavior after the operator explicitly copies the final handoff.
+
+
+## Approval and request lifecycle (MVP increment)
+
+`IncidentSession` issues immutable approval objects registered in a module-private WeakMap. The hybrid adapter rejects plain strings/forged objects, revoked objects and known excluded markers. It checks validity both before SDK setup and after genuine App Check token retrieval. The only variable incident payload is the approved string. App Check client initialization alone is not proof of attestation; `getToken` must succeed before the hybrid model is created. Server enforcement remains an integration acceptance task.
+
+Each request has a unique identity. Invalidation detaches the old request. Only the current identity can write results/errors/progress or clear busy state; manual preparation, case changes and clearing remain possible during initialization. A sent network request cannot be recalled, but its obsolete result cannot be applied.
+
+Local findings remain advisory. The editable review copy is derived deterministically from original lines, with identifiers replaced in place and explicit exclusion lines omitted. This preserves incident facts that share a line with a contact or IP. Sensitive detection is heuristic, never proof of anonymization. Generated output receives structural and conservative fidelity checks; these cannot establish factual correctness or replace human verification. Structured claim citations remain pending.
+
+Production code has no test-mode model or sample-handoff injection. SDK doubles exist only under Vitest. Playwright E2E uses the actual unconfigured manual product. A separate, explicit real-integration command contains no mocked responses and requires owner configuration.

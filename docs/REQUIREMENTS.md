@@ -1,33 +1,23 @@
 # Acceptance requirements
 
-The product dossier defines R01–R14 as the P0 submission requirements and R15 as a P1 Spanish-language extension. The rows below are a concise implementation checklist, not evidence that the requirements have passed.
+R01–R14 are P0 from the official Drive dossier; R15 is deferred P1. “Automated” below means deterministic checks, **not** a passed real Firebase acceptance test. See [engineering status](PROJECT-STATUS.md) for sources, design discrepancy, blockers and integration instructions.
 
-| ID | Acceptance target | Current evidence |
+| ID | Implemented behavior and associated test | Remaining acceptance evidence |
 |---|---|---|
-| R01 | Load a synthetic case or paste valid English notes; reject empty or oversized input without truncating it. | Starter validation only |
-| R02 | Analyze original notes with `ONLY_ON_DEVICE`; verify a new response while the browser tab is offline. | SDK adapter present; real test pending |
-| R03 | Manual review remains available when the local model is unavailable, downloading, or over context. | Manual draft path present; browser test pending |
-| R04 | Show candidate exclusions and keep source notes available for human review. | Basic pattern checks present; coverage incomplete |
-| R05 | Only an explicit approval of the exact visible copy enables hybrid generation. | Basic approval snapshot present; request inspection pending |
-| R06 | Editing notes or the sharing copy invalidates approval and stale results. | Basic invalidation present; race-condition tests pending |
-| R07 | Produce four fields while preserving chronology, uncertainty, and conflicting reports. | Prompt and A1 fixture present; fidelity tests pending |
-| R08 | Display `ON_DEVICE`, `IN_CLOUD`, or `Source unavailable` from response metadata. | Source mapping present; real model tests pending |
-| R09 | App Check, network, quota, format, and service errors preserve editable work. | Basic error handling present; failure tests pending |
-| R10 | Copy only after all four fields are reviewed; provide selectable text if clipboard access fails. | Basic review and fallback present |
-| R11 | Do not persist incident content or log it; clear it from the current session. | No persistence code; audit pending |
-| R12 | Evaluator can open the app without an account and follow free, reproducible instructions. | Documentation scaffold only |
-| R13 | English UI, keyboard order, visible focus, responsive 320 px layout, and announced state changes. | Initial UI only; accessibility audit pending |
-| R14 | Public repository, recognized open-source license, reproducible instructions, fictitious examples, Firebase AI Logic call, public video, and completed Devpost form. | Repository scaffold; submission evidence pending |
-| R15 | Spanish UI and equivalent fidelity across both inference paths. | Deferred P1 |
+| R01 | A1/A2/A3 buttons, free English input, empty/size validation without truncation. `relay.test.ts`, `App.test.tsx`, `workflow.spec.ts`. | Human walkthrough of full size limits. |
+| R02 | Real SDK `ONLY_ON_DEVICE`, user-initiated initialization; no hybrid model created on this path. `ai.test.ts` SDK doubles. | Fresh offline local inference on Lenovo/compatible Chrome, zero remote inference requests. |
+| R03 | Manual preparation/output during a pending model request, offline, and after error. Component and browser tests. | Actual unsupported/context/download failures on target browser. |
+| R04 | Email, credential, IPv4, phone, scratch/case marker detections; explicit exclusions, line navigation with emoji/CRLF; in-place removal preserves facts. Rule/component tests. | Structured source-linked AI claim citations and full marker review remain incomplete. Detector does not prove absence of sensitive data. |
+| R05 | Explicit exact-copy capability, revocation and revalidation after attestation; only approved string serialized as variable incident payload. Session and SDK-double tests. | Inspect real SDK request payload and zero leaks in real local/cloud runs. |
+| R06 | Unique request identity, no duplicate request per revision, edits/case change/clear invalidate; old success/failure/finally cannot overwrite current work or busy state. Session/component race tests. | Target-device race walkthrough. |
+| R07 | Four strict fields, conservative timestamp/certainty/missing-next-step checks; A1 chronology and A2/A3 source facts preserved by preparation. Rule/response tests. | Real generated A1–A3 rubric, source citations, chronology/source attribution; semantic correctness always needs human review. |
+| R08 | Per-response SDK source mapping incl. unknown label. SDK-double tests. | Real ON_DEVICE and IN_CLOUD responses from same build. |
+| R09 | Genuine App Check token required, strict malformed response rejection, editable draft retained on failure; generic UI errors do not echo SDK diagnostics. SDK/component tests. | Real quota, server enforcement, attestation and network error evidence. |
+| R10 | Four nonempty fields + review before copy or selectable fallback; actual clipboard and denial tested. Component/browser tests. | Target-device clipboard walkthrough. |
+| R11 | Memory-only incident data, clear/reload empties state; manual workflow sends no external requests and stores no data. Browser tests. | Deployed bundle/config/request audit. |
+| R12 | Lockfile, `npm ci`, build artifact, documented configuration and manual route without Firebase. CI and essential-file check. | Authorized public domain, clean evaluator access, real App Check, free-access verification. |
+| R13 | English labels, live status, focus navigation, keyboard activation, 320px reflow, automated axe scan. Browser tests. | Full keyboard and screen-reader walkthrough, 200% zoom and all states. |
+| R14 | Public repository, Apache-2.0, SDK calls, reproducible build and CI. | Real service evidence, public English video, final Devpost form and receipt. |
+| R15 | Deferred P1 Spanish UI and equivalent local/cloud fidelity. | Not implemented. |
 
-## Core synthetic case A1
-
-- 10:02: search timed out.
-- 10:05: worker restarted.
-- 10:10: first successful search.
-- 10:18: search timed out again.
-- A morning configuration change is suspected but not checked.
-- The recovery is temporary, not a resolution.
-- The next shift compares worker errors at 10:02 and 10:18 with the change record.
-
-The expected handoff is in [`../examples/a1.json`](../examples/a1.json). The sample contact and scratch marker are fictional test values.
+The expected A1 handoff in `examples/a1.json` is a rubric, not a real inference result and is not imported by the production AI adapter.

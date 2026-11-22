@@ -1,25 +1,41 @@
-# Project status snapshot
+# Engineering status — 2026-11-22
 
-## Confirmed from the project dossier
+This branch implements an independently testable MVP increment. It is **not** a completed hackathon submission or evidence of real Gemini inference.
 
-- Product: Relay, an incident-handoff workspace for support and operations teams.
-- Target: Web / Chrome.
-- Planned stack: React, TypeScript, Vite, Firebase AI Logic, Gemini Developer API, and App Check.
-- Required boundary: original notes stay on-device; only the exact human-approved sharing copy may enter the hybrid request.
-- Output: Observed impact, Actions and results, Open questions, and Next step.
-- Examples: three fictional incidents are planned; A1 is the only fixture included in this starter.
+## Implemented
 
-## Reported but not independently verified here
+- Reproducible exact dependency versions and npm lockfile; compatible Vite/Vitest types.
+- Session approval capabilities checked at the adapter boundary, before SDK initialization and again after asynchronous App Check token retrieval.
+- Explicit approval is revoked by editing input, sharing copy, handoff, switching cases, preparing manually or clearing. A stale response cannot finish a newer request, overwrite fields, restore cleared content or unlock copy.
+- Manual path available during model initialization and offline; four editable output fields, confirmation, clipboard and selectable fallback.
+- Synthetic A1–A3; line-based exclusions, explicit A3 exclusions, in-place redaction that retains facts sharing a line with an identifier, navigation back to original lines.
+- Independent local/hybrid model initialization; strict four-field response parsing, bounded response size, timestamp preservation and conservative certainty checks. Local findings are advisory; the review copy is derived from the original to avoid silently accepting a rewritten timeline.
+- Real App Check `getToken` prerequisite. No debug-token path, original-note cloud fallback, testing switch or fake production model.
+- Four-job CI: quality, unit/component/SDK doubles, production build and Chromium manual E2E. Reports/build artifacts retained seven days. PR updates and pushes to main run CI; branch pushes do not duplicate the PR run.
 
-The dossier records a direct Chrome Prompt API test on the owner's Lenovo device. That report is not evidence that the Relay app is integrated, that Firebase local inference works in the deployed build, or that cloud fallback and App Check are correctly configured.
+## Observed local results
 
-## Not yet verified
+TypeScript, production build, essential-file checks, unit/component tests, and Chromium E2E were run. The final exact test count and GitHub-hosted result are recorded in the Pull Request checks and execution evidence comment; local success does not imply remote CI success.
 
-- Firebase project and web-app configuration.
-- App Check provider registration and enforcement.
-- Fresh `ONLY_ON_DEVICE` response from the Relay build while offline.
-- Fresh `PREFER_ON_DEVICE` response from an approved copy with local inference unavailable.
-- Actual request body and absence of original notes/private markers.
-- `inferenceSource` values in both routes.
-- A1–A3 fidelity, stale-response rejection, 320 px behavior, keyboard and screen-reader checks.
-- Clean checkout, dependency lockfile, public demo, and Devpost receipt.
+The browser suite verifies an actual clipboard write, denied-clipboard fallback, offline manual work, empty state after reload, no external requests during manual work, empty browser storage, keyboard activation, no horizontal overflow at 320 CSS px and an automated axe scan. These are targeted checks, not full WCAG certification.
+
+## Real integration — BLOCKED
+
+`npm run test:integration` exited **2 / BLOCKED** because the four required Firebase public configuration variables are absent. It sent no request. Integration is an explicitly opt-in real-service Playwright test; it is excluded from deterministic CI, never replaced with a successful dummy test, and fails if the actual generation or response-source assertion fails.
+
+The owner must supply public web app identifiers and the public Enterprise site key, register the test/deployment domain, enable Firebase AI Logic and enforce App Check in Firebase. Values belong in local environment configuration, never private credentials in the repository. See `.env.example` and `tests/integration/firebase.spec.ts`.
+
+Separately pending: local-only fresh generation offline on the Lenovo/compatible Chrome, real ON_DEVICE and IN_CLOUD evidence from the same build, real request-body inspection, server enforcement/invalid-attestation evidence, quotas and domain access from a clean evaluator profile. A GitHub runner's Chromium UI test does not establish any of these.
+
+## Documentary sources and discrepancy
+
+Read through the Drive connector on 2026-11-22:
+
+- [Official dossier](https://drive.google.com/file/d/1VqvbjNgs6967ul1RSKzlusITPtwVwjh3/view): R01–R14, T01–T14, synthetic A1–A3, local/hybrid boundary and acceptance criteria.
+- [Specified approved design folder](https://drive.google.com/drive/folders/13ZjUqqwf1UvBilmqqXsptxd8H0of6d-6): contains **Relay · Atlas de interfaz · Blanco e índigo.pdf** (white/indigo).
+- The repository's `docs/DESIGN.md` and current CSS specify **Jade editorial**. The dossier folder also contains a Jade final-art folder. This is an unresolved design-source conflict. This increment retains the existing CSS colors/layout and makes no claim of final visual acceptance.
+- The dossier's A1 begins with the 10:18 recurrence before describing earlier events; the starter fixture is chronologically ordered. Both are synthetic variants with the same facts. No claim of verbatim fixture identity is made. Source-order fidelity with actual inference remains pending.
+
+## Next priority
+
+Configure Firebase and a compatible Chrome profile, then collect T02/T08/T09 evidence with synthetic data. Complete source-linked factual citations and human review of A1–A3 before treating R04/R07 as closed. Deployment, video, Devpost form and receipt remain owner-facing acceptance tasks. `main` must not be merged without approval.
