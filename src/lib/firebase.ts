@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   initializeAppCheck,
+  getToken,
   ReCaptchaEnterpriseProvider,
   type AppCheck,
 } from 'firebase/app-check';
@@ -9,6 +10,7 @@ interface FirebaseRuntime {
   app: FirebaseApp | null;
   appCheckReady: boolean;
   missing: string[];
+  verifyAppCheck: () => Promise<void>;
 }
 
 let app: FirebaseApp | null = null;
@@ -26,7 +28,15 @@ export function getFirebaseRuntime(): FirebaseRuntime {
 
   const required = ['apiKey', 'projectId', 'appId'] as const;
   const missing = required.filter((key) => !config[key]);
-  if (missing.length > 0) return { app: null, appCheckReady: false, missing };
+  if (missing.length > 0)
+    return {
+      app: null,
+      appCheckReady: false,
+      missing,
+      verifyAppCheck: async () => {
+        throw new Error('Firebase is not configured.');
+      },
+    };
 
   app = getApps().length > 0 ? getApp() : initializeApp(config);
 
@@ -38,5 +48,14 @@ export function getFirebaseRuntime(): FirebaseRuntime {
     });
   }
 
-  return { app, appCheckReady: Boolean(appCheck), missing: [] };
+  return {
+    app,
+    appCheckReady: Boolean(appCheck),
+    missing: [],
+    verifyAppCheck: async () => {
+      if (!appCheck) throw new Error('App Check is not configured.');
+      const result = await getToken(appCheck);
+      if (!result.token) throw new Error('App Check attestation failed.');
+    },
+  };
 }

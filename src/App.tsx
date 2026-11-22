@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { analyzeOnDevice, generateHandoff } from './lib/ai';
-import { A1_ORIGINAL } from './lib/examples';
+import { IncidentSession, type ApprovedCopy } from './lib/session';
+import { A1_ORIGINAL, A2_ORIGINAL, A3_ORIGINAL } from './lib/examples';
 import { getFirebaseRuntime } from './lib/firebase';
 import {
   buildSafeDraft,
@@ -27,8 +28,10 @@ function sourceLabel(source: InferenceSource): string {
 export default function App() {
   const runtime = useMemo(() => getFirebaseRuntime(), []);
   // Discard late AI responses after a user edits or resets the current incident.
-  const revision = useRef(0);
-  const [original, setOriginal] = useState(A1_ORIGINAL);
+  const originalEditor = useRef<HTMLTextAreaElement>(null);
+  const session = useRef(new IncidentSession());
+  const approval = useRef<ApprovedCopy | null>(null);
+  const [original, setOriginal] = useState('');
   const [sharingCopy, setSharingCopy] = useState('');
   const [excluded, setExcluded] = useState<ExcludedItem[]>([]);
   const [findings, setFindings] = useState<string[]>([]);
@@ -38,16 +41,28 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [reviewComplete, setReviewComplete] = useState(false);
-  const [status, setStatus] = useState('Original notes stay in this browser session.');
+  const [status, setStatus] = useState(
+    'Original notes stay in this browser session.',
+  );
   const [error, setError] = useState('');
 
   const originalError = validateOriginal(original);
-  const sharingError = validateSharingCopy(sharingCopy);
+  const sharingError =
+    validateSharingCopy(sharingCopy) ||
+    (excluded.some((item) =>
+      sharingCopy.toLowerCase().includes(item.value.toLowerCase()),
+    )
+      ? 'An excluded identifier remains in the sharing copy.'
+      : null);
   const isApproved = approvedText !== null && approvedText === sharingCopy;
   const canGenerate = isApproved && !busy && runtime.appCheckReady;
 
   function invalidateSharing() {
-    revision.current += 1;
+    session.current.invalidate();
+    approval.current = null;
+    setBusy(false);
+    setProgress(null);
+    setError('');
     setApprovedText(null);
     setHandoff(emptyHandoff());
     setReviewComplete(false);
@@ -60,7 +75,9 @@ export default function App() {
     setExcluded([]);
     setFindings([]);
     invalidateSharing();
-    setStatus('Original notes changed. Previous analysis and approval were invalidated.');
+    setStatus(
+      'Original notes changed. Previous analysis and approval were invalidated.',
+    );
   }
 
   function editSharing(value: string) {
@@ -75,36 +92,50 @@ export default function App() {
       setError(validation);
       return;
     }
+    if (busy || session.current.isBusy()) return;
+    invalidateSharing();
+    const request = session.current.begin();
+    if (!request) return;
     setBusy(true);
     setError('');
     setProgress(null);
-    invalidateSharing();
-    const requestRevision = revision.current;
-    setStatus('Preparing the on-device model. The original is not eligible for cloud fallback.');
+    setStatus(
+      'Preparing the on-device model. The original is not eligible for cloud fallback.',
+    );
     try {
-      const result = await analyzeOnDevice(original, setProgress);
-      if (requestRevision !== revision.current) return;
-      const suggested = result.value.sharingCopy?.trim() || original;
-      const safe = buildSafeDraft(suggested);
+      const result = await analyzeOnDevice(original, (value) => {
+        if (session.current.isCurrent(request)) setProgress(value);
+      });
+      if (!session.current.isCurrent(request)) return;
+      const safe = buildSafeDraft(original);
       setSharingCopy(safe.text);
       const originalMatches = buildSafeDraft(original).excluded;
       const uniqueMatches = new Map<string, ExcludedItem>(
-        [...originalMatches, ...safe.excluded].map((item) => [`${item.line}:${item.value}:${item.reason}`, item] as const),
+        [...originalMatches, ...safe.excluded].map(
+          (item) =>
+            [`${item.line}:${item.value}:${item.reason}`, item] as const,
+        ),
       );
       setExcluded([...uniqueMatches.values()]);
       setFindings(result.value.findings ?? []);
-      setStatus('Local review ready. Inspect every line before approving the sharing copy.');
-    } catch (cause) {
-      if (requestRevision !== revision.current) return;
+      setStatus(
+        'Local review ready. Inspect every line before approving the sharing copy.',
+      );
+    } catch {
+      if (!session.current.isCurrent(request)) return;
       const safe = buildSafeDraft(original);
       setSharingCopy(safe.text);
       setExcluded(safe.excluded);
       setFindings([]);
-      setStatus('The local model is unavailable. A rule-based draft is ready for manual review.');
-      setError(cause instanceof Error ? cause.message : 'Local analysis failed.');
+      setStatus(
+        'The local model is unavailable. A rule-based draft is ready for manual review.',
+      );
+      setError('Local analysis is unavailable. Continue with manual review.');
     } finally {
-      setBusy(false);
-      setProgress(null);
+      if (session.current.finish(request)) {
+        setBusy(false);
+        setProgress(null);
+      }
     }
   }
 
@@ -120,55 +151,83 @@ export default function App() {
     setFindings([]);
     invalidateSharing();
     setError('');
-    setStatus('Manual sharing copy prepared. Review the text and excluded items before approving.');
+    setStatus(
+      'Manual sharing copy prepared. Review the text and excluded items before approving.',
+    );
   }
 
   function approve() {
-    const validation = validateSharingCopy(sharingCopy);
+    const validation = sharingError;
     if (validation) {
       setError(validation);
       return;
     }
+    approval.current = session.current.approve(
+      sharingCopy,
+      excluded.map((item) => item.value),
+    );
     setApprovedText(sharingCopy);
     setError('');
-    setStatus('Approved snapshot created. Only this exact text can enter the hybrid model adapter.');
+    setStatus(
+      'Approved snapshot created. Only this exact text can enter the hybrid model adapter.',
+    );
   }
 
   async function generate() {
-    if (!isApproved || !approvedText) {
+    if (!isApproved || !approval.current) {
       setError('Approve the exact sharing copy before generating a handoff.');
       return;
     }
+    const request = session.current.begin();
+    if (!request) return;
     setBusy(true);
+    setReviewComplete(false);
     setError('');
-    const requestRevision = revision.current;
     setStatus('Generating from the approved sharing copy.');
     try {
-      const result = await generateHandoff(approvedText);
-      if (requestRevision !== revision.current) return;
+      const result = await generateHandoff(approval.current);
+      if (!session.current.isCurrent(request)) return;
       setHandoff(result.value);
       setSource(result.source);
       setReviewComplete(false);
-      setStatus('Handoff candidate ready. Verify each statement against the approved notes.');
-    } catch (cause) {
-      if (requestRevision !== revision.current) return;
-      setError(cause instanceof Error ? cause.message : 'Handoff generation failed.');
-      setStatus('Generation failed. Your approved copy is preserved for manual writing or retry.');
+      setStatus(
+        'Handoff candidate ready. Verify each statement against the approved notes.',
+      );
+    } catch {
+      if (!session.current.isCurrent(request)) return;
+      setError(
+        'Handoff generation failed. Review your draft and try again, or write the fields manually.',
+      );
+      setStatus(
+        'Generation failed. Your approved copy is preserved for manual writing or retry.',
+      );
     } finally {
-      setBusy(false);
+      if (session.current.finish(request)) setBusy(false);
     }
   }
 
   function editHandoff(key: keyof Handoff, value: string) {
-    revision.current += 1;
+    setApprovedText(null);
+    setSource('unknown');
+    session.current.invalidate();
+    approval.current = null;
+    setBusy(false);
+    setProgress(null);
     setHandoff((current) => ({ ...current, [key]: value }));
     setReviewComplete(false);
-    setStatus('Handoff edited. Review complete must be confirmed again before copying.');
+    setStatus(
+      'Handoff edited. Review complete must be confirmed again before copying.',
+    );
   }
 
   async function copyHandoff() {
-    if (!reviewComplete || FIELD_LABELS.some(({ key }) => !handoff[key].trim())) {
-      setError('Complete all four fields and confirm Review complete before copying.');
+    if (
+      !reviewComplete ||
+      FIELD_LABELS.some(({ key }) => !handoff[key].trim())
+    ) {
+      setError(
+        'Complete all four fields and confirm Review complete before copying.',
+      );
       return;
     }
     const text = handoffAsText(handoff);
@@ -177,16 +236,22 @@ export default function App() {
       setError('');
       setStatus('Handoff copied.');
     } catch {
-      setError('Clipboard access was denied. Select and copy the handoff text below.');
+      setError(
+        'Clipboard access was denied. Select and copy the handoff text below.',
+      );
     }
   }
 
   function clearIncident() {
-    revision.current += 1;
+    session.current.invalidate();
+    approval.current = null;
+    setBusy(false);
+    setProgress(null);
     setOriginal('');
     setSharingCopy('');
     setExcluded([]);
     setFindings([]);
+    setError('');
     setApprovedText(null);
     setHandoff(emptyHandoff());
     setSource('unknown');
@@ -198,13 +263,15 @@ export default function App() {
   return (
     <main className="shell">
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">››</div>
+        <div className="brand-mark" aria-hidden="true">
+          ››
+        </div>
         <div>
           <p className="eyebrow">LOTOS / INCIDENT WORKSPACE</p>
           <h1>Relay</h1>
         </div>
         <div className="header-spacer" />
-        <span className="sample-pill">Synthetic incident · A1</span>
+        <span className="sample-pill">Session workspace</span>
       </header>
 
       <div className="status-line" role="status" aria-live="polite">
@@ -213,12 +280,14 @@ export default function App() {
 
       {!runtime.app && (
         <div className="notice" role="note">
-          Firebase is not configured. The sample and manual review flow work locally; AI actions require the variables in <code>.env.local</code>.
+          AI is unavailable. You can prepare a sharing copy and write the four
+          handoff fields manually on this device.
         </div>
       )}
       {runtime.app && !runtime.appCheckReady && (
         <div className="notice" role="note">
-          Firebase is configured, but App Check is not. Hybrid generation stays disabled because it may send the approved copy to the cloud.
+          Firebase is configured, but App Check is not. Hybrid generation stays
+          disabled because it may send the approved copy to the cloud.
         </div>
       )}
 
@@ -231,8 +300,11 @@ export default function App() {
             </div>
             <span className="local-tag">On this device</span>
           </div>
-          <p className="helper">The original remains in memory for this session.</p>
+          <p className="helper">
+            The original remains in memory for this session.
+          </p>
           <textarea
+            ref={originalEditor}
             aria-label="Original incident notes"
             value={original}
             onChange={(event) => editOriginal(event.target.value)}
@@ -240,14 +312,46 @@ export default function App() {
             spellCheck={false}
           />
           <div className="button-row wrap">
-            <button className="primary" type="button" onClick={analyze} disabled={busy || Boolean(originalError) || !runtime.app}>
-              {busy && progress !== null ? `Preparing model ${Math.round(progress * 100)}%` : 'Analyze on this device'}
+            <button
+              className="primary"
+              type="button"
+              onClick={analyze}
+              disabled={busy || Boolean(originalError) || !runtime.app}
+            >
+              {busy
+                ? progress !== null
+                  ? `Preparing model ${Math.round(progress * 100)}%`
+                  : 'Working on this device…'
+                : 'Analyze on this device'}
             </button>
-            <button className="secondary" type="button" onClick={prepareManually} disabled={busy || Boolean(originalError)}>
+            <button
+              className="secondary"
+              type="button"
+              onClick={prepareManually}
+              disabled={Boolean(originalError)}
+            >
               Prepare manually
             </button>
-            <button className="quiet" type="button" onClick={() => editOriginal(A1_ORIGINAL)} disabled={busy}>
+            <button
+              className="quiet"
+              type="button"
+              onClick={() => editOriginal(A1_ORIGINAL)}
+            >
               Try A1
+            </button>
+            <button
+              className="quiet"
+              type="button"
+              onClick={() => editOriginal(A2_ORIGINAL)}
+            >
+              Try A2
+            </button>
+            <button
+              className="quiet"
+              type="button"
+              onClick={() => editOriginal(A3_ORIGINAL)}
+            >
+              Try A3
             </button>
           </div>
           {originalError && <p className="error-text">{originalError}</p>}
@@ -259,9 +363,13 @@ export default function App() {
               <span className="step">02</span>
               <h2 id="sharing-title">Review what may be shared</h2>
             </div>
-            <span className={isApproved ? 'approved-tag' : 'pending-tag'}>{isApproved ? 'Approved' : 'Pending review'}</span>
+            <span className={isApproved ? 'approved-tag' : 'pending-tag'}>
+              {isApproved ? 'Approved' : 'Pending review'}
+            </span>
           </div>
-          <p className="helper strong-helper">Only the text below may be sent to the cloud.</p>
+          <p className="helper strong-helper">
+            Only the text below may be sent to the cloud.
+          </p>
           <textarea
             aria-label="Sharing copy"
             value={sharingCopy}
@@ -273,12 +381,37 @@ export default function App() {
           <div className="excluded-box">
             <h3>Excluded from sharing copy</h3>
             {excluded.length === 0 ? (
-              <p className="helper">No pattern matches recorded. This does not prove the text contains no sensitive information.</p>
+              <p className="helper">
+                No pattern matches recorded. This does not prove the text
+                contains no sensitive information.
+              </p>
             ) : (
               <ul>
                 {excluded.map((item, index) => (
                   <li key={`${item.line}-${item.value}-${index}`}>
-                    <code>Line {item.line}</code> · {item.reason}: <span>{item.value}</span>
+                    <button
+                      type="button"
+                      className="quiet"
+                      onClick={() => {
+                        const lines = original.split(/\r\n|\r|\n/);
+                        const separators = original.match(/\r\n|\r|\n/g) ?? [];
+                        const start = lines
+                          .slice(0, item.line - 1)
+                          .reduce(
+                            (sum, line, i) =>
+                              sum + line.length + (separators[i]?.length ?? 0),
+                            0,
+                          );
+                        originalEditor.current?.focus();
+                        originalEditor.current?.setSelectionRange(
+                          start,
+                          start + (lines[item.line - 1]?.length ?? 0),
+                        );
+                      }}
+                    >
+                      Line {item.line}
+                    </button>{' '}
+                    · {item.reason}: <span>{item.value}</span>
                   </li>
                 ))}
               </ul>
@@ -287,19 +420,37 @@ export default function App() {
           {findings.length > 0 && (
             <details className="findings">
               <summary>Local model findings</summary>
-              <ul>{findings.map((finding, index) => <li key={index}>{finding}</li>)}</ul>
+              <ul>
+                {findings.map((finding, index) => (
+                  <li key={index}>{finding}</li>
+                ))}
+              </ul>
             </details>
           )}
           <div className="button-row wrap">
-            <button className="primary" type="button" onClick={approve} disabled={busy || Boolean(sharingError)}>
+            <button
+              className="primary"
+              type="button"
+              onClick={approve}
+              disabled={busy || Boolean(sharingError)}
+            >
               Approve this text
             </button>
-            <button className="secondary" type="button" onClick={generate} disabled={!canGenerate}>
+            <button
+              className="secondary"
+              type="button"
+              onClick={generate}
+              disabled={!canGenerate}
+            >
               {busy ? 'Generating handoff…' : 'Generate handoff'}
             </button>
           </div>
           {sharingError && <p className="error-text">{sharingError}</p>}
-          {approvedText && !isApproved && <p className="error-text">Text changed. Review and approve again.</p>}
+          {approvedText && !isApproved && (
+            <p className="error-text">
+              Text changed. Review and approve again.
+            </p>
+          )}
         </section>
       </section>
 
@@ -307,11 +458,15 @@ export default function App() {
         <div className="panel-heading">
           <div>
             <span className="step">03</span>
-            <h2 id="handoff-title" tabIndex={-1}>Shift handoff</h2>
+            <h2 id="handoff-title" tabIndex={-1}>
+              Shift handoff
+            </h2>
           </div>
           <span className="source-tag">{sourceLabel(source)}</span>
         </div>
-        <p className="helper">The next shift gets four fields. Keep uncertainty visible.</p>
+        <p className="helper">
+          The next shift gets four fields. Keep uncertainty visible.
+        </p>
         <div className="handoff-fields">
           {FIELD_LABELS.map(({ key, label }) => (
             <label className="handoff-field" key={key}>
@@ -328,20 +483,49 @@ export default function App() {
         </div>
         <div className="handoff-actions">
           <label className="review-check">
-            <input type="checkbox" checked={reviewComplete} onChange={(event) => setReviewComplete(event.target.checked)} />
+            <input
+              type="checkbox"
+              checked={reviewComplete}
+              onChange={(event) => setReviewComplete(event.target.checked)}
+            />
             <span>Review complete</span>
           </label>
-          <button className="primary" type="button" onClick={copyHandoff} disabled={!reviewComplete || busy}>
+          <button
+            className="primary"
+            type="button"
+            onClick={copyHandoff}
+            disabled={
+              !reviewComplete ||
+              busy ||
+              FIELD_LABELS.some(({ key }) => !handoff[key].trim())
+            }
+          >
             Copy handoff
           </button>
         </div>
-        <textarea className="copy-fallback" aria-label="Selectable handoff text" readOnly value={handoffAsText(handoff)} />
+        <textarea
+          className="copy-fallback"
+          aria-label="Selectable handoff text"
+          readOnly
+          value={
+            reviewComplete &&
+            FIELD_LABELS.every(({ key }) => handoff[key].trim())
+              ? handoffAsText(handoff)
+              : ''
+          }
+        />
       </section>
 
-      {error && <div className="error-banner" role="alert">{error}</div>}
+      {error && (
+        <div className="error-banner" role="alert">
+          {error}
+        </div>
+      )}
       <footer className="footer-row">
         <span>Session-only state · No incident persistence</span>
-        <button className="quiet" type="button" onClick={clearIncident} disabled={busy}>Clear incident</button>
+        <button className="quiet" type="button" onClick={clearIncident}>
+          Clear incident
+        </button>
       </footer>
     </main>
   );
