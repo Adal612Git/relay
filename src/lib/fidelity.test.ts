@@ -33,6 +33,21 @@ describe('Synthetic incident fidelity fixtures A1–A3', () => {
     });
   }
 
+  it('A1–A3: expected outputs preserve every recorded clock time and forbid unsupported claims', () => {
+    for (const fixture of fixtures) {
+      const source = fixture.originalNotes.join('\n');
+      const output = handoffAsText(fixture.expectedHandoff);
+      const sourceTimes = new Set(source.match(/\b\d{1,2}:\d{2}\b/g) ?? []);
+      const outputTimes = new Set(output.match(/\b\d{1,2}:\d{2}\b/g) ?? []);
+      expect(outputTimes, fixture.id).toEqual(sourceTimes);
+      if ('forbiddenClaims' in fixture) {
+        for (const claim of fixture.forbiddenClaims) {
+          expect(output.toLowerCase(), fixture.id).not.toContain(claim.toLowerCase());
+        }
+      }
+    }
+  });
+
   it('A2: contradictory observations remain explicitly unresolved', () => {
     expect(a2.expectedHandoff.observedImpact).toMatch(/conflict/i);
     expect(a2.expectedHandoff.openQuestions).toMatch(/unconfirmed/i);
