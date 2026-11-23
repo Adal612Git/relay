@@ -45,6 +45,7 @@ export default function App() {
   const sharingError = validateSharingCopy(sharingCopy);
   const isApproved = approvedText !== null && approvedText === sharingCopy;
   const canGenerate = isApproved && !busy && runtime.appCheckReady;
+  const handoffFieldsComplete = FIELD_LABELS.every(({ key }) => handoff[key].trim().length > 0);
 
   function invalidateSharing() {
     revision.current += 1;
@@ -328,10 +329,10 @@ export default function App() {
         </div>
         <div className="handoff-actions">
           <label className="review-check">
-            <input type="checkbox" checked={reviewComplete} onChange={(event) => setReviewComplete(event.target.checked)} />
+            <input type="checkbox" checked={reviewComplete} disabled={!handoffFieldsComplete || busy} onChange={(event) => setReviewComplete(event.target.checked)} />
             <span>Review complete</span>
           </label>
-          <button className="primary" type="button" onClick={copyHandoff} disabled={!reviewComplete || busy}>
+          <button className="primary" type="button" onClick={copyHandoff} disabled={!reviewComplete || !handoffFieldsComplete || busy}>
             Copy handoff
           </button>
         </div>
