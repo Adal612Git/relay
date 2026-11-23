@@ -93,3 +93,13 @@ textarea::placeholder { color: #8495a1; }
   .button-row button { flex: 1 1 100%; }
   .handoff-actions { align-items: stretch; flex-direction: column; }
 }
+
+/* Keyboard accessibility: checkbox and buttons remain clearly focused. */
+.review-check input:focus-visible { outline: 3px solid var(--violet); outline-offset: 4px; }
+
+/* Prevent the header labels from forcing horizontal scrolling at 320 CSS px. */
+@media (max-width: 420px) {
+  .topbar { flex-wrap: wrap; }
+  .header-spacer { display: none; }
+  .sample-pill { max-width: 100%; overflow-wrap: anywhere; }
+}
