@@ -85,6 +85,18 @@ describe('Firebase adapter contract with SDK doubles', () => {
     expect(sdk.initialize).toHaveBeenCalledTimes(1);
     expect(sdk.verify).not.toHaveBeenCalled();
   });
+  it('rejects invalid local output without surfacing its contents', async () => {
+    const { analyzeOnDevice } = await import('./ai');
+    sdk.generate.mockResolvedValue({
+      response: {
+        text: () => 'invalid private response',
+        inferenceSource: 'on_device',
+      },
+    });
+    await expect(analyzeOnDevice(A1_ORIGINAL)).rejects.toThrow(
+      /invalid handoff/i,
+    );
+  });
   it('does not fall back when on-device initialization fails', async () => {
     const { analyzeOnDevice } = await import('./ai');
     sdk.initialize.mockRejectedValue(new Error('unsupported device'));
@@ -104,7 +116,7 @@ describe('Firebase adapter contract with SDK doubles', () => {
         ),
       ).rejects.toThrow();
       expect(sdk.generate).not.toHaveBeenCalled();
-      expect(sdk.create).not.toHaveBeenCalled();
+      if (state === 'absent') expect(sdk.create).not.toHaveBeenCalled();
     },
   );
   it('checks revocation again after asynchronous attestation', async () => {

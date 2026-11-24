@@ -10,7 +10,8 @@
     "13:14 API request to inspect delivery details timed out. No further retry was performed.",
     "No confirmation that the 202 event was processed downstream.",
     "Next shift: reconcile event IDs against provider receipts before retrying; avoid duplicate delivery.",
-    "Scratch tag: RAW-LOTOS-TEST"
+    "Scratch tag: RAW-LOTOS-TEST",
+    "Keep this out of the handoff: “silver teacup”."
   ],
   "expectedHandoff": {
     "observedImpact": "Two synthetic webhook deliveries returned HTTP 503 at 13:02; at 13:09 the partner dashboard still showed one event as undelivered.",
@@ -19,7 +20,8 @@
     "nextStep": "Reconcile event IDs against provider receipts before retrying to avoid duplicates."
   },
   "expectedExclusions": [
-    "RAW-LOTOS-TEST"
+    "RAW-LOTOS-TEST",
+    "silver teacup"
   ],
   "forbiddenClaims": [
     "Provider degradation caused the failures",

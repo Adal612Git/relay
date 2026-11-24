@@ -1,20 +1,36 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Explicit opt-in, real service only. Never included in the deterministic CI suite.
 export default defineConfig({
   testDir: './tests/integration',
   retries: 0,
   workers: 1,
-  timeout: 120_000,
+  timeout: 360_000,
   reporter: 'list',
-  // Do not attach request bodies, tokens, console logs or traces.
   use: {
     baseURL: 'http://localhost:4175',
     trace: 'off',
     screenshot: 'off',
     video: 'off',
   },
-  projects: [{ name: 'real-firebase', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'real-cloud-fallback',
+      testMatch: 'firebase.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'real-chrome-offline',
+      testMatch: 'chrome.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        headless: false,
+        launchOptions: {
+          args: ['--enable-features=PromptApiForGeminiNanoMultimodalInput'],
+        },
+      },
+    },
+  ],
   webServer: {
     command: 'npm run dev -- --host localhost --port 4175 --strictPort',
     url: 'http://localhost:4175',

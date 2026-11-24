@@ -1,4 +1,4 @@
-import { validateSharingCopy } from './relay';
+import { hasExcludedValue, validateSharingCopy } from './relay';
 
 // Capabilities are deliberately not serializable approvals. Only this module issues them.
 export interface ApprovedCopy {
@@ -31,11 +31,7 @@ export class IncidentSession {
   approve(text: string, excludedValues: string[] = []): ApprovedCopy {
     const error = validateSharingCopy(text);
     if (error) throw new Error(error);
-    if (
-      excludedValues.some((value) =>
-        text.toLowerCase().includes(value.toLowerCase()),
-      )
-    ) {
+    if (hasExcludedValue(text, excludedValues)) {
       throw new Error('An excluded identifier remains in the sharing copy.');
     }
     const revision = this.revision;

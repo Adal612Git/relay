@@ -7,6 +7,8 @@ import {
   buildSafeDraft,
   emptyHandoff,
   handoffAsText,
+  handoffErrorMessage,
+  hasExcludedValue,
   validateOriginal,
   validateSharingCopy,
 } from './lib/relay';
@@ -29,6 +31,8 @@ export default function App() {
   const runtime = useMemo(() => getFirebaseRuntime(), []);
   // Discard late AI responses after a user edits or resets the current incident.
   const originalEditor = useRef<HTMLTextAreaElement>(null);
+  const handoffHeading = useRef<HTMLHeadingElement>(null);
+  const copyAttempt = useRef<symbol | null>(null);
   const session = useRef(new IncidentSession());
   const approval = useRef<ApprovedCopy | null>(null);
   const [original, setOriginal] = useState('');
@@ -38,9 +42,13 @@ export default function App() {
   const [approvedText, setApprovedText] = useState<string | null>(null);
   const [handoff, setHandoff] = useState<Handoff>(emptyHandoff());
   const [source, setSource] = useState<InferenceSource>('unknown');
-  const [busy, setBusy] = useState(false);
+  const [operation, setOperation] = useState<'analysis' | 'generation' | null>(
+    null,
+  );
   const [progress, setProgress] = useState<number | null>(null);
   const [reviewComplete, setReviewComplete] = useState(false);
+  const [showCopyFallback, setShowCopyFallback] = useState(false);
+  const [handoffEdited, setHandoffEdited] = useState(false);
   const [status, setStatus] = useState(
     'Original notes stay in this browser session.',
   );
@@ -49,18 +57,26 @@ export default function App() {
   const originalError = validateOriginal(original);
   const sharingError =
     validateSharingCopy(sharingCopy) ||
-    (excluded.some((item) =>
-      sharingCopy.toLowerCase().includes(item.value.toLowerCase()),
+    (hasExcludedValue(
+      sharingCopy,
+      excluded.map((item) => item.value),
     )
       ? 'An excluded identifier remains in the sharing copy.'
       : null);
+  const busy = operation !== null;
+  const handoffFieldsComplete = FIELD_LABELS.every(({ key }) =>
+    Boolean(handoff[key].trim()),
+  );
   const isApproved = approvedText !== null && approvedText === sharingCopy;
   const canGenerate = isApproved && !busy && runtime.appCheckReady;
 
   function invalidateSharing() {
     session.current.invalidate();
     approval.current = null;
-    setBusy(false);
+    copyAttempt.current = null;
+    setShowCopyFallback(false);
+    setHandoffEdited(false);
+    setOperation(null);
     setProgress(null);
     setError('');
     setApprovedText(null);
@@ -96,7 +112,7 @@ export default function App() {
     invalidateSharing();
     const request = session.current.begin();
     if (!request) return;
-    setBusy(true);
+    setOperation('analysis');
     setError('');
     setProgress(null);
     setStatus(
@@ -109,17 +125,10 @@ export default function App() {
       if (!session.current.isCurrent(request)) return;
       const safe = buildSafeDraft(original);
       setSharingCopy(safe.text);
-      const originalMatches = buildSafeDraft(original).excluded;
-      const uniqueMatches = new Map<string, ExcludedItem>(
-        [...originalMatches, ...safe.excluded].map(
-          (item) =>
-            [`${item.line}:${item.value}:${item.reason}`, item] as const,
-        ),
-      );
-      setExcluded([...uniqueMatches.values()]);
+      setExcluded(safe.excluded);
       setFindings(result.value.findings ?? []);
       setStatus(
-        'Local review ready. Inspect every line before approving the sharing copy.',
+        'On-device analysis complete. Inspect every line before approving the sharing copy.',
       );
     } catch {
       if (!session.current.isCurrent(request)) return;
@@ -133,7 +142,7 @@ export default function App() {
       setError('Local analysis is unavailable. Continue with manual review.');
     } finally {
       if (session.current.finish(request)) {
-        setBusy(false);
+        setOperation(null);
         setProgress(null);
       }
     }
@@ -180,7 +189,9 @@ export default function App() {
     }
     const request = session.current.begin();
     if (!request) return;
-    setBusy(true);
+    setOperation('generation');
+    copyAttempt.current = null;
+    setShowCopyFallback(false);
     setReviewComplete(false);
     setError('');
     setStatus('Generating from the approved sharing copy.');
@@ -189,29 +200,32 @@ export default function App() {
       if (!session.current.isCurrent(request)) return;
       setHandoff(result.value);
       setSource(result.source);
+      setHandoffEdited(false);
       setReviewComplete(false);
+      handoffHeading.current?.focus();
       setStatus(
         'Handoff candidate ready. Verify each statement against the approved notes.',
       );
-    } catch {
+    } catch (failure) {
       if (!session.current.isCurrent(request)) return;
-      setError(
-        'Handoff generation failed. Review your draft and try again, or write the fields manually.',
-      );
+      setError(handoffErrorMessage(failure));
       setStatus(
         'Generation failed. Your approved copy is preserved for manual writing or retry.',
       );
     } finally {
-      if (session.current.finish(request)) setBusy(false);
+      if (session.current.finish(request)) setOperation(null);
     }
   }
 
   function editHandoff(key: keyof Handoff, value: string) {
     setApprovedText(null);
-    setSource('unknown');
+    setHandoffEdited(true);
+    copyAttempt.current = null;
+    setShowCopyFallback(false);
+    setError('');
     session.current.invalidate();
     approval.current = null;
-    setBusy(false);
+    setOperation(null);
     setProgress(null);
     setHandoff((current) => ({ ...current, [key]: value }));
     setReviewComplete(false);
@@ -221,21 +235,20 @@ export default function App() {
   }
 
   async function copyHandoff() {
-    if (
-      !reviewComplete ||
-      FIELD_LABELS.some(({ key }) => !handoff[key].trim())
-    ) {
-      setError(
-        'Complete all four fields and confirm Review complete before copying.',
-      );
+    if (!reviewComplete || !handoffFieldsComplete || session.current.isBusy())
       return;
-    }
     const text = handoffAsText(handoff);
+    const attempt = Symbol();
+    copyAttempt.current = attempt;
     try {
       await navigator.clipboard.writeText(text);
+      if (copyAttempt.current !== attempt) return;
       setError('');
+      setShowCopyFallback(false);
       setStatus('Handoff copied.');
     } catch {
+      if (copyAttempt.current !== attempt) return;
+      setShowCopyFallback(true);
       setError(
         'Clipboard access was denied. Select and copy the handoff text below.',
       );
@@ -243,21 +256,13 @@ export default function App() {
   }
 
   function clearIncident() {
-    session.current.invalidate();
-    approval.current = null;
-    setBusy(false);
-    setProgress(null);
+    invalidateSharing();
     setOriginal('');
     setSharingCopy('');
     setExcluded([]);
     setFindings([]);
-    setError('');
-    setApprovedText(null);
-    setHandoff(emptyHandoff());
-    setSource('unknown');
-    setReviewComplete(false);
-    setError('');
     setStatus('Incident cleared from the current browser session.');
+    originalEditor.current?.focus();
   }
 
   return (
@@ -306,10 +311,12 @@ export default function App() {
           <textarea
             ref={originalEditor}
             aria-label="Original incident notes"
+            aria-describedby={originalError ? 'original-error' : undefined}
             value={original}
             onChange={(event) => editOriginal(event.target.value)}
             rows={14}
             spellCheck={false}
+            autoComplete="off"
           />
           <div className="button-row wrap">
             <button
@@ -318,7 +325,7 @@ export default function App() {
               onClick={analyze}
               disabled={busy || Boolean(originalError) || !runtime.app}
             >
-              {busy
+              {operation === 'analysis'
                 ? progress !== null
                   ? `Preparing model ${Math.round(progress * 100)}%`
                   : 'Working on this device…'
@@ -354,7 +361,18 @@ export default function App() {
               Try A3
             </button>
           </div>
-          {originalError && <p className="error-text">{originalError}</p>}
+          {operation === 'analysis' && (
+            <progress
+              aria-label="Preparing the on-device model"
+              max={1}
+              value={progress ?? undefined}
+            />
+          )}
+          {originalError && (
+            <p className="error-text" id="original-error">
+              {originalError}
+            </p>
+          )}
         </section>
 
         <section className="panel" aria-labelledby="sharing-title">
@@ -372,11 +390,13 @@ export default function App() {
           </p>
           <textarea
             aria-label="Sharing copy"
+            aria-describedby={sharingError ? 'sharing-error' : undefined}
             value={sharingCopy}
             onChange={(event) => editSharing(event.target.value)}
             rows={14}
             placeholder="Analyze the original or prepare a copy manually to begin review."
             spellCheck={false}
+            autoComplete="off"
           />
           <div className="excluded-box">
             <h3>Excluded from sharing copy</h3>
@@ -442,13 +462,14 @@ export default function App() {
               onClick={generate}
               disabled={!canGenerate}
             >
-              {busy ? 'Generating handoff…' : 'Generate handoff'}
+              {operation === 'generation'
+                ? 'Generating handoff…'
+                : 'Generate handoff'}
             </button>
           </div>
-          {sharingError && <p className="error-text">{sharingError}</p>}
-          {approvedText && !isApproved && (
-            <p className="error-text">
-              Text changed. Review and approve again.
+          {sharingError && (
+            <p className="error-text" id="sharing-error">
+              {sharingError}
             </p>
           )}
         </section>
@@ -458,11 +479,16 @@ export default function App() {
         <div className="panel-heading">
           <div>
             <span className="step">03</span>
-            <h2 id="handoff-title" tabIndex={-1}>
+            <h2 ref={handoffHeading} id="handoff-title" tabIndex={-1}>
               Shift handoff
             </h2>
           </div>
-          <span className="source-tag">{sourceLabel(source)}</span>
+          <span className="source-tag">
+            {source === 'unknown' && handoffEdited
+              ? 'Written manually'
+              : sourceLabel(source)}
+            {source !== 'unknown' && handoffEdited ? ' · edited' : ''}
+          </span>
         </div>
         <p className="helper">
           The next shift gets four fields. Keep uncertainty visible.
@@ -476,6 +502,8 @@ export default function App() {
                 value={handoff[key]}
                 onChange={(event) => editHandoff(key, event.target.value)}
                 rows={3}
+                spellCheck={false}
+                autoComplete="off"
                 placeholder="Your handoff will appear here after generation."
               />
             </label>
@@ -486,7 +514,12 @@ export default function App() {
             <input
               type="checkbox"
               checked={reviewComplete}
-              onChange={(event) => setReviewComplete(event.target.checked)}
+              disabled={!handoffFieldsComplete || busy}
+              onChange={(event) => {
+                copyAttempt.current = null;
+                setShowCopyFallback(false);
+                setReviewComplete(event.target.checked);
+              }}
             />
             <span>Review complete</span>
           </label>
@@ -494,33 +527,26 @@ export default function App() {
             className="primary"
             type="button"
             onClick={copyHandoff}
-            disabled={
-              !reviewComplete ||
-              busy ||
-              FIELD_LABELS.some(({ key }) => !handoff[key].trim())
-            }
+            disabled={!reviewComplete || !handoffFieldsComplete || busy}
           >
             Copy handoff
           </button>
         </div>
-        <textarea
-          className="copy-fallback"
-          aria-label="Selectable handoff text"
-          readOnly
-          value={
-            reviewComplete &&
-            FIELD_LABELS.every(({ key }) => handoff[key].trim())
-              ? handoffAsText(handoff)
-              : ''
-          }
-        />
+        {error && (
+          <div className="error-banner" role="alert">
+            {error}
+          </div>
+        )}
+        {showCopyFallback && reviewComplete && handoffFieldsComplete && (
+          <textarea
+            className="copy-fallback"
+            aria-label="Selectable handoff text"
+            readOnly
+            value={handoffAsText(handoff)}
+          />
+        )}
       </section>
 
-      {error && (
-        <div className="error-banner" role="alert">
-          {error}
-        </div>
-      )}
       <footer className="footer-row">
         <span>Session-only state · No incident persistence</span>
         <button className="quiet" type="button" onClick={clearIncident}>

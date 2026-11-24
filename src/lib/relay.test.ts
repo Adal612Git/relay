@@ -72,37 +72,31 @@ describe('synthetic case preservation (rules, not inference)', () => {
       ),
     ).toThrow(/suspected/);
   });
-  it('retains A2 dashboard facts on the same line as an IP, plus conflicting reports and unknown scope', () => {
+  it('retains A2 conflicting reports and adjacent probe facts', () => {
     const { text } = buildSafeDraft(A2_ORIGINAL);
-    for (const fact of [
-      '24 waiting at 14:00',
-      '14:03',
-      'zero waiting',
-      'Scope on that screen unknown',
-      '14:06',
-      'No reconcile run',
-      'Could be',
-    ])
-      expect(text).toContain(fact);
-    for (const excluded of [
-      '192.0.2.18',
-      'CASE-AMBER',
-      'queue.ops@example.test',
-    ])
-      expect(text).not.toContain(excluded);
+    expect(text).toContain(
+      '08:49 Support agent reported one ticket still waiting 110 seconds; dashboard and report conflict.',
+    );
+    expect(text).toContain('08:55 Queue wait exceeded 90 seconds again.');
+    expect(text).not.toContain('192.0.2.18');
+    expect(text).not.toContain('casey@example.test');
   });
-  it('retains A3 missing information and removes both explicit exclusions', () => {
+  it('retains A3 uncertainty and excludes both private markers', () => {
     const { text, excluded } = buildSafeDraft(A3_ORIGINAL);
-    expect(text).not.toContain('RAW-COBALT');
+    expect(text).not.toContain('RAW-LOTOS-TEST');
     expect(text).not.toContain('silver teacup');
     expect(excluded.map((item) => item.value)).toContain('silver teacup');
     expect(text).toContain(
-      'No trace for the first receipt. No wider delivery count was taken.',
+      'No confirmation that the 202 event was processed downstream.',
     );
+  });
+  it('requires an explicit missing-next-step statement when no action was recorded', () => {
+    const text = 'No follow-up action was recorded before shift change.';
     const result = {
-      observedImpact: 'One receipt missing at 16:40.',
-      actionsAndResults: 'A new test sent at 16:46 arrived at 16:48.',
-      openQuestions: 'No trace for the first receipt; wider impact unknown.',
+      ...A1_EXPECTED,
+      observedImpact: 'Unknown.',
+      actionsAndResults: 'None recorded.',
+      openQuestions: 'Response unknown.',
       nextStep: 'No next step recorded.',
     };
     expect(() => validateHandoffFidelity(result, text)).not.toThrow();

@@ -16,6 +16,12 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
+    env: {
+      VITE_FIREBASE_API_KEY: '',
+      VITE_FIREBASE_PROJECT_ID: '',
+      VITE_FIREBASE_APP_ID: '',
+      VITE_RECAPTCHA_ENTERPRISE_SITE_KEY: '',
+    },
   },
 });

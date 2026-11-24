@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import a1 from '../../examples/a1.json';
-import a2 from '../../examples/a2.json';
-import a3 from '../../examples/a3.json';
+import { EXAMPLES as fixtures } from './examples';
 import { buildSafeDraft, handoffAsText, validateSharingCopy } from './relay';
 
-const fixtures = [a1, a2, a3] as const;
-const fields = ['observedImpact', 'actionsAndResults', 'openQuestions', 'nextStep'] as const;
+const [, a2, a3] = fixtures;
+const fields = [
+  'observedImpact',
+  'actionsAndResults',
+  'openQuestions',
+  'nextStep',
+] as const;
 
 describe('Synthetic incident fidelity fixtures A1–A3', () => {
   for (const fixture of fixtures) {
@@ -42,7 +45,9 @@ describe('Synthetic incident fidelity fixtures A1–A3', () => {
       expect(outputTimes, fixture.id).toEqual(sourceTimes);
       if ('forbiddenClaims' in fixture) {
         for (const claim of fixture.forbiddenClaims) {
-          expect(output.toLowerCase(), fixture.id).not.toContain(claim.toLowerCase());
+          expect(output.toLowerCase(), fixture.id).not.toContain(
+            claim.toLowerCase(),
+          );
         }
       }
     }

@@ -132,7 +132,9 @@ describe('operator workflow and stale requests', () => {
       }),
     );
     expect(field('Original incident notes').value).toBe(A2_ORIGINAL);
-    expect(field('Sharing copy').value).toContain('24 waiting at 14:00');
+    expect(field('Sharing copy').value).toContain(
+      '08:41 Queue wait exceeded 90 seconds for EU tickets.',
+    );
     expect(screen.queryByText('OLD RESPONSE')).toBeNull();
     expect(screen.getByText('NEW RESPONSE')).toBeTruthy();
   });
@@ -197,7 +199,9 @@ describe('operator workflow and stale requests', () => {
     await act(async () => {
       fireEvent.click(button('Generate handoff'));
     });
-    expect(field('Selectable handoff text').value).toBe('');
+    expect(
+      screen.queryByRole('textbox', { name: 'Selectable handoff text' }),
+    ).toBeNull();
     fireEvent.click(screen.getByRole('checkbox', { name: 'Review complete' }));
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -211,7 +215,9 @@ describe('operator workflow and stale requests', () => {
       A1_EXPECTED.actionsAndResults,
     );
     change('Next step', 'Compare the change record.');
-    expect(field('Selectable handoff text').value).toBe('');
+    expect(
+      screen.queryByRole('textbox', { name: 'Selectable handoff text' }),
+    ).toBeNull();
     expect(button('Copy handoff').disabled).toBe(true);
     expect(field('Original incident notes').value).toBe(A1_ORIGINAL);
   });

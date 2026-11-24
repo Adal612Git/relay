@@ -283,6 +283,9 @@ textarea::placeholder {
   align-items: center;
   gap: 10px;
 }
+.review-check input:focus-visible {
+  outline-offset: 4px;
+}
 .review-check input {
   width: 20px;
   height: 20px;
@@ -343,13 +346,18 @@ textarea::placeholder {
     padding: 12px;
   }
   .topbar {
+    flex-wrap: wrap;
     gap: 10px;
   }
   .brand-mark {
     width: 36px;
     font-size: 28px;
   }
+  .header-spacer {
+    display: none;
+  }
   .sample-pill {
+    overflow-wrap: anywhere;
     font-size: 11px;
   }
   .panel-heading {
@@ -362,4 +370,10 @@ textarea::placeholder {
     align-items: stretch;
     flex-direction: column;
   }
+}
+
+progress {
+  width: 100%;
+  margin-top: 12px;
+  accent-color: var(--jade);
 }

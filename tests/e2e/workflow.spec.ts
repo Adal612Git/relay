@@ -1,13 +1,13 @@
 // Exercises the actual app with no Firebase configuration; handoffs are written by the test operator.
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { A1_EXPECTED } from '../../src/lib/examples';
 
 const fields = {
-  'Observed impact': 'Search timed out at 10:02 and again at 10:18.',
-  'Actions and results':
-    'Worker restarted at 10:05; success at 10:10. Recovery was temporary.',
-  'Open questions': 'Morning config change suspected; not checked.',
-  'Next step': 'Compare errors at 10:02 and 10:18 with the change record.',
+  'Observed impact': A1_EXPECTED.observedImpact,
+  'Actions and results': A1_EXPECTED.actionsAndResults,
+  'Open questions': A1_EXPECTED.openQuestions,
+  'Next step': A1_EXPECTED.nextStep,
 };
 
 test('A1 review, explicit approval, manual handoff and real clipboard', async ({
@@ -40,6 +40,9 @@ test('A1 review, explicit approval, manual handoff and real clipboard', async ({
   ).toBeDisabled();
   await copy.fill((await copy.inputValue()) + '\nOperator review.');
   await expect(page.getByText('Pending review', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('checkbox', { name: 'Review complete' }),
+  ).toBeDisabled();
   for (const [name, value] of Object.entries(fields))
     await page.getByRole('textbox', { name, exact: true }).fill(value);
   await expect(
@@ -49,16 +52,17 @@ test('A1 review, explicit approval, manual handoff and real clipboard', async ({
   await page.getByRole('button', { name: 'Copy handoff' }).click();
   await expect(page.getByRole('status')).toContainText('Handoff copied.');
   const clipboard = await page.evaluate(() => navigator.clipboard.readText());
-  expect(clipboard).toContain(
+  expect(clipboard.replace(/\r\n/g, '\n')).toContain(
     'Actions and results\n' + fields['Actions and results'],
   );
   expect(external).toEqual([]);
   expect(
-    await page.evaluate(() => ({
+    await page.evaluate(async () => ({
       local: localStorage.length,
       session: sessionStorage.length,
+      databases: (await indexedDB.databases()).length,
     })),
-  ).toEqual({ local: 0, session: 0 });
+  ).toEqual({ local: 0, session: 0, databases: 0 });
   await page.reload();
   await expect(
     page.getByRole('textbox', { name: 'Sharing copy', exact: true }),
@@ -75,7 +79,7 @@ test('manual workflow works offline and offers a clipboard fallback', async ({
   await page.getByRole('button', { name: 'Prepare manually' }).click();
   await expect(
     page.getByRole('textbox', { name: 'Sharing copy', exact: true }),
-  ).not.toHaveValue(/silver teacup|RAW-COBALT/);
+  ).not.toHaveValue(/silver teacup|RAW-LOTOS-TEST/);
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'clipboard', {
       value: {

@@ -42,10 +42,15 @@ export function getFirebaseRuntime(): FirebaseRuntime {
 
   const siteKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
   if (siteKey && !appCheck) {
-    appCheck = initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(siteKey),
-      isTokenAutoRefreshEnabled: true,
-    });
+    try {
+      appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(siteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    } catch {
+      // Keep on-device analysis and manual review available if App Check fails to initialize.
+      appCheck = null;
+    }
   }
 
   return {
