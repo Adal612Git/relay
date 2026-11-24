@@ -271,6 +271,11 @@ h1 {
   min-width: 0;
 }
 
+.panel-heading h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .panel-heading {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -338,6 +343,7 @@ textarea {
 }
 
 textarea::placeholder {
+  opacity: 1;
   color: #a1b0ba;
 }
 
@@ -493,6 +499,7 @@ textarea::placeholder {
 }
 
 .line-link {
+  scroll-margin-block: 6px;
   flex: 0 0 auto;
   min-height: 28px;
   border-radius: 5px;
@@ -513,6 +520,7 @@ textarea::placeholder {
 
 .findings summary {
   width: fit-content;
+  min-height: 24px;
   padding: 5px 2px;
   color: var(--jade);
   cursor: pointer;
@@ -559,6 +567,7 @@ textarea[readonly] {
 
 .handoff-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
@@ -705,6 +714,7 @@ progress {
 @media (max-width: 380px) {
   .button-row {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .handoff-actions {
@@ -716,5 +726,17 @@ progress {
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  button:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  :where(button, textarea, input, summary):focus-visible,
+  #handoff-title:focus-visible {
+    outline-color: Highlight;
   }
 }
