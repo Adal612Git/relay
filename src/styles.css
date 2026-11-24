@@ -22,6 +22,12 @@
   --danger-surface: #342327;
   --ui: 'Segoe UI', system-ui, sans-serif;
   --mono: Consolas, ui-monospace, monospace;
+  --type-brand: 32px;
+  --type-section: 22px;
+  --type-brand-narrow: 27px;
+  --type-section-narrow: 19px;
+  --leading-brand: 1.05;
+  --leading-heading: 1.2;
   --radius-panel: 8px;
   --radius-control: 6px;
   --radius-status: 6px;
@@ -127,10 +133,10 @@ button:disabled {
 
 h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: var(--type-brand);
   font-weight: 670;
   letter-spacing: -0.045em;
-  line-height: 1.05;
+  line-height: var(--leading-brand);
 }
 
 .session-tag,
@@ -292,10 +298,10 @@ h1 {
 
 h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: var(--type-section);
   font-weight: 650;
   letter-spacing: -0.025em;
-  line-height: 1.2;
+  line-height: var(--leading-heading);
 }
 
 h3 {
@@ -622,7 +628,7 @@ progress {
   }
 
   h1 {
-    font-size: 27px;
+    font-size: var(--type-brand-narrow);
   }
 
   .panel {
@@ -635,7 +641,7 @@ progress {
   }
 
   h2 {
-    font-size: 19px;
+    font-size: var(--type-section-narrow);
   }
 
   .handoff-fields {
