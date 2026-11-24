@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { analyzeOnDevice, generateHandoff } from './lib/ai';
 import { IncidentSession, type ApprovedCopy } from './lib/session';
-import { A1_ORIGINAL, A2_ORIGINAL, A3_ORIGINAL } from './lib/examples';
+import { EXAMPLES } from './lib/examples';
 import { getFirebaseRuntime } from './lib/firebase';
 import {
   buildSafeDraft,
@@ -9,17 +9,36 @@ import {
   handoffAsText,
   handoffErrorMessage,
   hasExcludedValue,
+  MAX_ORIGINAL_LENGTH,
+  MAX_SHARING_LENGTH,
   validateOriginal,
   validateSharingCopy,
 } from './lib/relay';
 import type { ExcludedItem, Handoff, InferenceSource } from './lib/types';
 
-const FIELD_LABELS: Array<{ key: keyof Handoff; label: string }> = [
-  { key: 'observedImpact', label: 'Observed impact' },
-  { key: 'actionsAndResults', label: 'Actions and results' },
-  { key: 'openQuestions', label: 'Open questions' },
-  { key: 'nextStep', label: 'Next step' },
-];
+const FIELD_LABELS: Array<{ key: keyof Handoff; label: string; hint: string }> =
+  [
+    {
+      key: 'observedImpact',
+      label: 'Observed impact',
+      hint: 'What changed for users or systems?',
+    },
+    {
+      key: 'actionsAndResults',
+      label: 'Actions and results',
+      hint: 'What was tried, and what happened?',
+    },
+    {
+      key: 'openQuestions',
+      label: 'Open questions',
+      hint: 'What is still uncertain?',
+    },
+    {
+      key: 'nextStep',
+      label: 'Next step',
+      hint: 'What should the incoming shift do?',
+    },
+  ];
 
 function sourceLabel(source: InferenceSource): string {
   if (source === 'on_device') return 'Generated on this device';
@@ -63,6 +82,8 @@ export default function App() {
     )
       ? 'An excluded identifier remains in the sharing copy.'
       : null);
+  const showOriginalError = original.length > 0 && Boolean(originalError);
+  const showSharingError = sharingCopy.length > 0 && Boolean(sharingError);
   const busy = operation !== null;
   const handoffFieldsComplete = FIELD_LABELS.every(({ key }) =>
     Boolean(handoff[key].trim()),
@@ -268,19 +289,18 @@ export default function App() {
   return (
     <main className="shell">
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">
-          ››
-        </div>
+        <div className="brand-mark" aria-hidden="true" />
         <div>
-          <p className="eyebrow">LOTOS / INCIDENT WORKSPACE</p>
+          <p className="eyebrow">Lotos Technologies</p>
           <h1>Relay</h1>
         </div>
-        <div className="header-spacer" />
-        <span className="sample-pill">Session workspace</span>
+        <span className="session-tag" title="Incidents are not saved">
+          Session only
+        </span>
       </header>
 
       <div className="status-line" role="status" aria-live="polite">
-        <span className="status-dot" /> {status}
+        <span className="status-dot" aria-hidden="true" /> {status}
       </div>
 
       {!runtime.app && (
@@ -297,28 +317,72 @@ export default function App() {
       )}
 
       <section className="workspace-grid">
-        <section className="panel" aria-labelledby="original-title">
+        <section
+          className="panel editor-panel original-panel"
+          aria-labelledby="original-title"
+        >
           <div className="panel-heading">
             <div>
-              <span className="step">01</span>
+              <span className="step" aria-hidden="true">
+                01
+              </span>
               <h2 id="original-title">Original notes</h2>
             </div>
-            <span className="local-tag">On this device</span>
+            <span className="local-tag">Private · on device</span>
           </div>
           <p className="helper">
-            The original remains in memory for this session.
+            Paste the outgoing shift’s notes for on-device analysis.
           </p>
           <textarea
             ref={originalEditor}
+            className="incident-editor"
+            placeholder="Paste the timeline, observations, and actions…"
             aria-label="Original incident notes"
-            aria-describedby={originalError ? 'original-error' : undefined}
+            aria-describedby={
+              showOriginalError
+                ? 'original-error original-count'
+                : 'original-count'
+            }
             value={original}
             onChange={(event) => editOriginal(event.target.value)}
-            rows={14}
+            rows={9}
             spellCheck={false}
             autoComplete="off"
           />
-          <div className="button-row wrap">
+          <div className="editor-caption">
+            {showOriginalError && (
+              <p className="error-text" id="original-error">
+                {originalError}
+              </p>
+            )}
+            <span className="character-count" id="original-count">
+              {original.length.toLocaleString('en-US')} /{' '}
+              {MAX_ORIGINAL_LENGTH.toLocaleString('en-US')}
+            </span>
+          </div>
+          <div className="sample-bar">
+            <h3>Synthetic examples</h3>
+            <div className="sample-actions">
+              {EXAMPLES.map((example) => (
+                <button
+                  key={example.id}
+                  type="button"
+                  title={example.title}
+                  onClick={() => editOriginal(example.originalNotes.join('\n'))}
+                >
+                  Try {example.id}
+                </button>
+              ))}
+            </div>
+          </div>
+          {operation === 'analysis' && (
+            <progress
+              aria-label="Preparing the on-device model"
+              max={1}
+              value={progress ?? undefined}
+            />
+          )}
+          <div className="button-row">
             <button
               className="primary"
               type="button"
@@ -339,71 +403,62 @@ export default function App() {
             >
               Prepare manually
             </button>
-            <button
-              className="quiet"
-              type="button"
-              onClick={() => editOriginal(A1_ORIGINAL)}
-            >
-              Try A1
-            </button>
-            <button
-              className="quiet"
-              type="button"
-              onClick={() => editOriginal(A2_ORIGINAL)}
-            >
-              Try A2
-            </button>
-            <button
-              className="quiet"
-              type="button"
-              onClick={() => editOriginal(A3_ORIGINAL)}
-            >
-              Try A3
-            </button>
           </div>
-          {operation === 'analysis' && (
-            <progress
-              aria-label="Preparing the on-device model"
-              max={1}
-              value={progress ?? undefined}
-            />
-          )}
-          {originalError && (
-            <p className="error-text" id="original-error">
-              {originalError}
-            </p>
-          )}
         </section>
 
-        <section className="panel" aria-labelledby="sharing-title">
+        <section
+          className="panel editor-panel sharing-panel"
+          aria-labelledby="sharing-title"
+        >
           <div className="panel-heading">
             <div>
-              <span className="step">02</span>
-              <h2 id="sharing-title">Review what may be shared</h2>
+              <span className="step" aria-hidden="true">
+                02
+              </span>
+              <h2 id="sharing-title">Sharing copy</h2>
             </div>
             <span className={isApproved ? 'approved-tag' : 'pending-tag'}>
               {isApproved ? 'Approved' : 'Pending review'}
             </span>
           </div>
-          <p className="helper strong-helper">
-            Only the text below may be sent to the cloud.
+          <p className="helper">
+            Only the copy you approve may be sent to the cloud.
           </p>
           <textarea
+            className="incident-editor"
             aria-label="Sharing copy"
-            aria-describedby={sharingError ? 'sharing-error' : undefined}
+            aria-describedby={
+              showSharingError ? 'sharing-error sharing-count' : 'sharing-count'
+            }
             value={sharingCopy}
             onChange={(event) => editSharing(event.target.value)}
-            rows={14}
+            rows={9}
             placeholder="Analyze the original or prepare a copy manually to begin review."
             spellCheck={false}
             autoComplete="off"
           />
+          <div className="editor-caption">
+            {showSharingError && (
+              <p className="error-text" id="sharing-error">
+                {sharingError}
+              </p>
+            )}
+            <span className="character-count" id="sharing-count">
+              {sharingCopy.length.toLocaleString('en-US')} /{' '}
+              {MAX_SHARING_LENGTH.toLocaleString('en-US')}
+            </span>
+          </div>
           <div className="excluded-box">
-            <h3>Excluded from sharing copy</h3>
+            <div className="excluded-heading">
+              <h3>Excluded from sharing copy</h3>
+              {excluded.length > 0 && (
+                <span className="excluded-count">{excluded.length}</span>
+              )}
+            </div>
             {excluded.length === 0 ? (
               <p className="helper">
-                No pattern matches recorded. This does not prove the text
-                contains no sensitive information.
+                No exclusions listed. Check the copy for other sensitive
+                details.
               </p>
             ) : (
               <ul>
@@ -411,7 +466,7 @@ export default function App() {
                   <li key={`${item.line}-${item.value}-${index}`}>
                     <button
                       type="button"
-                      className="quiet"
+                      className="line-link"
                       onClick={() => {
                         const lines = original.split(/\r\n|\r|\n/);
                         const separators = original.match(/\r\n|\r|\n/g) ?? [];
@@ -430,8 +485,11 @@ export default function App() {
                       }}
                     >
                       Line {item.line}
-                    </button>{' '}
-                    · {item.reason}: <span>{item.value}</span>
+                    </button>
+                    <span>
+                      {item.reason} ·{' '}
+                      <span className="excluded-value">{item.value}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -447,9 +505,9 @@ export default function App() {
               </ul>
             </details>
           )}
-          <div className="button-row wrap">
+          <div className="button-row">
             <button
-              className="primary"
+              className={isApproved ? 'secondary' : 'primary'}
               type="button"
               onClick={approve}
               disabled={busy || Boolean(sharingError)}
@@ -457,7 +515,7 @@ export default function App() {
               Approve this text
             </button>
             <button
-              className="secondary"
+              className={isApproved ? 'primary' : 'secondary'}
               type="button"
               onClick={generate}
               disabled={!canGenerate}
@@ -467,34 +525,33 @@ export default function App() {
                 : 'Generate handoff'}
             </button>
           </div>
-          {sharingError && (
-            <p className="error-text" id="sharing-error">
-              {sharingError}
-            </p>
-          )}
         </section>
       </section>
 
       <section className="panel handoff-panel" aria-labelledby="handoff-title">
         <div className="panel-heading">
           <div>
-            <span className="step">03</span>
+            <span className="step" aria-hidden="true">
+              03
+            </span>
             <h2 ref={handoffHeading} id="handoff-title" tabIndex={-1}>
               Shift handoff
             </h2>
           </div>
-          <span className="source-tag">
-            {source === 'unknown' && handoffEdited
-              ? 'Written manually'
-              : sourceLabel(source)}
+          <span className="source-tag" data-source={source}>
+            {source === 'unknown' && !handoffFieldsComplete && !handoffEdited
+              ? 'Awaiting handoff'
+              : source === 'unknown' && handoffEdited
+                ? 'Written manually'
+                : sourceLabel(source)}
             {source !== 'unknown' && handoffEdited ? ' · edited' : ''}
           </span>
         </div>
         <p className="helper">
-          The next shift gets four fields. Keep uncertainty visible.
+          Check each field against the incident notes before copying.
         </p>
         <div className="handoff-fields">
-          {FIELD_LABELS.map(({ key, label }) => (
+          {FIELD_LABELS.map(({ key, label, hint }) => (
             <label className="handoff-field" key={key}>
               <span>{label}</span>
               <textarea
@@ -504,7 +561,7 @@ export default function App() {
                 rows={3}
                 spellCheck={false}
                 autoComplete="off"
-                placeholder="Your handoff will appear here after generation."
+                placeholder={hint}
               />
             </label>
           ))}
@@ -548,7 +605,6 @@ export default function App() {
       </section>
 
       <footer className="footer-row">
-        <span>Session-only state · No incident persistence</span>
         <button className="quiet" type="button" onClick={clearIncident}>
           Clear incident
         </button>

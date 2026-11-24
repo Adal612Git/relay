@@ -6,10 +6,10 @@ The design guide records this direction as awaiting the product owner's complete
 
 ## Responsive behavior
 
-- Maximum content width: 1376 px.
-- Two equal columns on wide screens, 24 px gap.
+- Maximum content width is 1264 px.
+- The original and sharing editors align in two columns with a 16 px gap. The handoff fields form a two-by-two grid on desktop.
 - One column below 960 px, preserving DOM and keyboard order.
-- At 320 px: 16 px outer margin, 12 px panel padding, full-width fields, vertical scrolling, no horizontal overflow.
+- At 320 px: 16 px outer margin, 13 px panel padding, full-width fields, vertical scrolling, no horizontal overflow.
 - Primary controls are at least 44 px high.
 - Text remains readable without relying on color alone.
 

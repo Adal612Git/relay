@@ -6,7 +6,7 @@
 | --- | --- |
 | Release branch and exact head | [release/relay-rc1](https://github.com/Adal612Git/relay/tree/release/relay-rc1) · [PR #7 commits](https://github.com/Adal612Git/relay/pull/7/commits) |
 | CI on release head | [PR #7 checks](https://github.com/Adal612Git/relay/pull/7/checks) |
-| Free evaluator preview | [Relay RC1 on Firebase Hosting](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · Hosting version `f3758dfb626ea192` · expires December 24, 2026 at 05:08 Guadalajara time. |
+| Free evaluator preview | [Relay RC1 on Firebase Hosting](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · Hosting version `2d3e9ae95b5d8e4a` · expires December 24, 2026 at 05:24 Guadalajara time. |
 | Local preview | [http://localhost:4174/](http://localhost:4174/) |
 | Repository and license | [Public GitHub repository](https://github.com/Adal612Git/relay) · [Apache 2.0](../LICENSE) |
 
@@ -17,7 +17,7 @@
 - [PR #4](https://github.com/Adal612Git/relay/pull/4) supplies adversarial privacy tests. RC1 adds credential, IPv6, Unicode and exclusion coverage.
 - [PR #5](https://github.com/Adal612Git/relay/pull/5) supplies the A2/A3 fixtures and integrity tests. The canonical fixtures now drive the product, tests and demo. The live suite checks forbidden claims against model responses.
 - [PR #6](https://github.com/Adal612Git/relay/pull/6) supplies review and narrow-viewport improvements, adapted to preserve request isolation.
-- `41a0d10` integrates the fixes and `dee1224` adds the first RC1 report and test gates. The release-head commit pins the stable Gemini fallback, adds `firebase.json`, strengthens the live integration assertions, and records the verified release. [Full file diff](https://github.com/Adal612Git/relay/pull/7/files) · [Commit history](https://github.com/Adal612Git/relay/pull/7/commits)
+- `41a0d10` integrates the fixes and `dee1224` adds the first RC1 report and test gates. `f122efe` pins the stable Gemini fallback, configures Hosting, and records the verified Firebase release. The current interface refresh clarifies the original, sharing copy and handoff, including the review state and the actual inference source. [Full file diff](https://github.com/Adal612Git/relay/pull/7/files) · [Commit history](https://github.com/Adal612Git/relay/pull/7/commits)
 - The original local checkout retained its six tracked edits and five untracked files. Work took place in the separate `C:\Users\Rick\Documents\LotosTechnologies\RelayByLotos-rc1` worktree.
 
 ## Results
