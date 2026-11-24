@@ -259,6 +259,11 @@ h1 {
   min-width: 0;
 }
 
+.panel-heading h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .panel-heading {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -535,6 +540,7 @@ textarea::placeholder {
 
 .handoff-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
@@ -675,6 +681,7 @@ progress {
 @media (max-width: 380px) {
   .button-row {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .handoff-actions {
