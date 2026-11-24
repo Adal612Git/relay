@@ -101,6 +101,8 @@ Detection is limited to known patterns and explicit directives. Human approval r
 
 Devpost requires an English submission, a public open-source repository, a working project with free access for judges during judging, and a public YouTube demo of up to three minutes. The deadline is November 30, 2026 at 2:00 p.m. PST (4:00 p.m. in Guadalajara). [Official rules](https://firebasehybridaihackathon.devpost.com/rules) · [Official dates](https://firebasehybridaihackathon.devpost.com/details/dates)
 
+The [Devpost package](docs/DEVPOST-SUBMISSION.md) contains the English submission copy, evaluator instructions and publication checklist.
+
 ## License
 
 Apache License 2.0. See [`LICENSE`](LICENSE).

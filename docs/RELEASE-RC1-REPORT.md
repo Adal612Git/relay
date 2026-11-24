@@ -1,11 +1,11 @@
 # Relay by Lotos · Release Candidate 1
 
-**GO for the technical release and demo recording.** The hosted preview runs Firebase AI Logic on the no-cost Spark plan. Record the English demo and attach the public YouTube link before submitting the Devpost entry.
+**GO for the technical release and demo recording.** The hosted preview runs Firebase AI Logic on the no-cost Spark plan. The recorded video, model-generation confirmation and submission approval are tracked in the [Devpost package](DEVPOST-SUBMISSION.md).
 
 | Item | Evidence |
 | --- | --- |
 | Release branch and exact head | [release/relay-rc1](https://github.com/Adal612Git/relay/tree/release/relay-rc1) · [PR #7 commits](https://github.com/Adal612Git/relay/pull/7/commits) |
-| CI on release head | [PR #7 checks](https://github.com/Adal612Git/relay/pull/7/checks) |
+| CI on the verified app | [App commit aa49445](https://github.com/Adal612Git/relay/commit/aa49445b44f5cbac84e9b1e49b618b5911a28e5a) · [app CI run](https://github.com/Adal612Git/relay/actions/runs/45384128619) · [current PR #7 checks](https://github.com/Adal612Git/relay/pull/7/checks) |
 | Free evaluator preview | [Relay RC1 on Firebase Hosting](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · Hosting version `2d3e9ae95b5d8e4a` · expires December 24, 2026 at 05:24 Guadalajara time. |
 | Local preview | [http://localhost:4174/](http://localhost:4174/) |
 | Repository and license | [Public GitHub repository](https://github.com/Adal612Git/relay) · [Apache 2.0](../LICENSE) |

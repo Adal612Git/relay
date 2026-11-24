@@ -13,6 +13,6 @@ The design guide records this direction as awaiting the product owner's complete
 - Primary controls are at least 44 px high.
 - Text remains readable without relying on color alone.
 
-## Accessibility checks still required
+## Accessibility verification
 
-Keyboard-only walkthrough, visible and unobscured focus, screen-reader status announcements, 200% zoom, reflow at 320 CSS px, and computed contrast for interactive states must be tested in the implemented app. Design mockups and calculated token pairs are not a WCAG conformance claim.
+The implemented workspace passed automated keyboard and focus checks plus axe sweeps at 320, 768 and 1440 CSS px. A full screen-reader and 200% zoom walkthrough remains useful for a broader accessibility evaluation. [RC1 evidence](RELEASE-RC1-REPORT.md)
