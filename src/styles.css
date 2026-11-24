@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
-  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
-  color: #e8eeef;
-  background: #101820;
+  font-family: var(--ui);
+  color: var(--text);
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --bg: #101820;
@@ -20,7 +20,16 @@
   --divider: #354550;
   --danger: #f0aaa5;
   --danger-surface: #342327;
-  --mono: 'IBM Plex Mono', Consolas, ui-monospace, monospace;
+  --ui: 'Segoe UI', system-ui, sans-serif;
+  --mono: Consolas, ui-monospace, monospace;
+  --radius-panel: 8px;
+  --radius-control: 6px;
+  --radius-status: 6px;
+  --brand-surface: #233b34;
+  --brand-border: #527565;
+  --focus: var(--violet);
+  --disabled: #9eafb8;
+  --disabled-surface: #24323c;
 }
 
 * {
@@ -30,8 +39,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(ellipse at 50% 0, #203239 0, transparent 58rem)
-    var(--bg);
+  background: var(--bg);
 }
 
 button,
@@ -45,7 +53,7 @@ button {
   min-width: 0;
   padding: 8px 15px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font-size: 14px;
   font-weight: 650;
   cursor: pointer;
@@ -55,15 +63,15 @@ button {
 }
 
 button:disabled {
-  color: #9eafb8;
-  background: #24323c;
+  color: var(--disabled);
+  background: var(--disabled-surface);
   border-color: #3d4e58;
   cursor: not-allowed;
 }
 
 :where(button, textarea, input, summary):focus-visible,
 #handoff-title:focus-visible {
-  outline: 2px solid var(--violet);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -85,9 +93,9 @@ button:disabled {
   position: relative;
   flex: 0 0 49px;
   height: 49px;
-  border: 1px solid #527565;
-  border-radius: 14px;
-  background: linear-gradient(145deg, #304a41, #1d3230);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-panel);
+  background: var(--brand-surface);
 }
 
 .brand-mark::before,
@@ -137,7 +145,7 @@ h1 {
   max-width: 100%;
   min-height: 27px;
   border: 1px solid var(--divider);
-  border-radius: 99px;
+  border-radius: var(--radius-status);
   padding: 4px 9px;
   color: var(--muted);
   background: #202e37;
@@ -194,7 +202,7 @@ h1 {
   color: #ccdadc;
   background: #19282f;
   border: 1px solid var(--divider);
-  border-radius: 9px;
+  border-radius: var(--radius-status);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -205,7 +213,6 @@ h1 {
   height: 7px;
   border-radius: 50%;
   background: var(--jade);
-  box-shadow: 0 0 0 3px #2c4641;
 }
 
 .notice,
@@ -230,9 +237,8 @@ h1 {
   min-width: 0;
   padding: 22px;
   border: 1px solid var(--divider);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   background: var(--surface);
-  box-shadow: 0 8px 28px #080e122b;
 }
 
 .editor-panel {
@@ -266,7 +272,7 @@ h1 {
   height: 31px;
   place-items: center;
   border: 1px solid #4e6a60;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   color: var(--jade);
   background: #233b34;
   font: 600 12px var(--mono);
@@ -313,7 +319,7 @@ textarea {
   color: var(--text);
   background: var(--input);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
@@ -353,7 +359,7 @@ textarea::placeholder {
   margin: 12px 0;
   padding: 11px 12px;
   border: 1px solid var(--divider);
-  border-radius: 9px;
+  border-radius: var(--radius-status);
   background: #1c2a33;
 }
 
@@ -557,7 +563,7 @@ textarea::placeholder {
 .error-text {
   margin: 0;
   color: var(--danger);
-  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--ui);
   font-size: 12px;
 }
 
