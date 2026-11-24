@@ -12,6 +12,7 @@ test('Chrome analyzes private notes offline through Firebase ONLY_ON_DEVICE', as
         headless: false,
         baseURL,
         args: ['--enable-features=PromptApiForGeminiNanoMultimodalInput'],
+        ignoreDefaultArgs: ['--disable-component-update'],
       })
     : null;
   const page = persistent ? await persistent.newPage() : defaultPage;

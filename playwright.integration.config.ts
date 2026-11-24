@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const staging = process.env.RELAY_INTEGRATION_BASE_URL;
+
 export default defineConfig({
   testDir: './tests/integration',
   retries: 0,
@@ -7,7 +9,7 @@ export default defineConfig({
   timeout: 360_000,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4175',
+    baseURL: staging ?? 'http://localhost:4175',
     trace: 'off',
     screenshot: 'off',
     video: 'off',
@@ -27,13 +29,16 @@ export default defineConfig({
         headless: false,
         launchOptions: {
           args: ['--enable-features=PromptApiForGeminiNanoMultimodalInput'],
+          ignoreDefaultArgs: ['--disable-component-update'],
         },
       },
     },
   ],
-  webServer: {
-    command: 'npm run dev -- --host localhost --port 4175 --strictPort',
-    url: 'http://localhost:4175',
-    reuseExistingServer: false,
-  },
+  webServer: staging
+    ? undefined
+    : {
+        command: 'npm run dev -- --host localhost --port 4175 --strictPort',
+        url: 'http://localhost:4175',
+        reuseExistingServer: false,
+      },
 });

@@ -44,3 +44,11 @@ Each request has a unique identity. Invalidation detaches the old request. Only 
 Local findings remain advisory. The editable review copy is derived deterministically from original lines, with identifiers replaced in place and explicit exclusion lines omitted. This preserves incident facts that share a line with a contact or IP. Sensitive detection is heuristic, never proof of anonymization. Generated output receives structural and conservative fidelity checks; these cannot establish factual correctness or replace human verification. Structured claim citations remain pending.
 
 Production code has no test-mode model or sample-handoff injection. SDK doubles exist only under Vitest. Playwright E2E uses the actual unconfigured manual product. A separate, explicit real-integration command contains no mocked responses and requires owner configuration.
+
+## RC1 verification boundaries
+
+The device-only model produces local review findings. Deterministic redaction prepares the editable copy from the original, preserving adjacent facts. Local model output cannot replace the source timeline. An invalid result leaves the operator with a rule-based draft and manual review.
+
+The hybrid adapter warms the device model, obtains App Check attestation, and revalidates the revocable approval capability immediately before building the approved-only inference payload. The clipboard gate requires all four fields and a separate final human review. Firebase SDK request verification and browser storage assertions are described in the [release report](RELEASE-RC1-REPORT.md).
+
+The [three JSON fixtures](../examples/) supply the UI samples, deterministic tests, live evaluation inputs and demonstration. Live tests compare actual output against recorded timestamps and fixture-specific forbidden claims.
