@@ -321,6 +321,7 @@ textarea {
 }
 
 textarea::placeholder {
+  opacity: 1;
   color: #a1b0ba;
 }
 
@@ -468,6 +469,7 @@ textarea::placeholder {
 }
 
 .line-link {
+  scroll-margin-block: 6px;
   flex: 0 0 auto;
   min-height: 28px;
   border-radius: 5px;
@@ -488,6 +490,7 @@ textarea::placeholder {
 
 .findings summary {
   width: fit-content;
+  min-height: 24px;
   padding: 5px 2px;
   color: var(--jade);
   cursor: pointer;
@@ -681,5 +684,17 @@ progress {
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  button:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  :where(button, textarea, input, summary):focus-visible,
+  #handoff-title:focus-visible {
+    outline-color: Highlight;
   }
 }
