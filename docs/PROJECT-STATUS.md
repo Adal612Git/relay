@@ -1,5 +1,7 @@
 # Engineering status — 2026-11-22
 
+> Historical MVP snapshot. For the verified hosted release and current Firebase results, see the [RC1 release report](RELEASE-RC1-REPORT.md).
+
 This branch implements an independently testable MVP increment. It is **not** a completed hackathon submission or evidence of real Gemini inference.
 
 ## Implemented

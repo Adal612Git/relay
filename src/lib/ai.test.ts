@@ -68,7 +68,13 @@ describe('Firebase adapter contract with SDK doubles', () => {
     );
     expect(prompt).not.toContain('robin@example.test');
     expect(prompt).not.toContain('RAW-ORCHID');
-    expect(sdk.create.mock.calls[0][1]).toEqual({ mode: 'prefer_on_device' });
+    expect(sdk.create.mock.calls[0][1]).toEqual({
+      mode: 'prefer_on_device',
+      inCloudParams: {
+        model: 'gemini-3.5-flash-lite',
+        generationConfig: { responseMimeType: 'application/json' },
+      },
+    });
     expect(result.source).toBe('in_cloud');
   });
   it('never constructs a cloud-capable model during private analysis', async () => {

@@ -4,7 +4,7 @@
 
 Relay is a browser-based incident workspace for technical support and operations teams. It helps an outgoing operator preserve the timeline, distinguish facts from hypotheses, remove information from a sharing copy, and prepare a concise handoff for the next shift.
 
-> **Release candidate:** the manual workflow and deterministic checks are ready for rehearsal. Live inference, App Check and cloud payload verification are acceptance gates. See the [RC1 report](docs/RELEASE-RC1-REPORT.md).
+> **RC1 is ready for technical evaluation.** Chrome offline analysis, hybrid inference on device and in the cloud, and App Check were exercised against real Firebase services. [Open the free Firebase Hosting preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · [Release evidence](docs/RELEASE-RC1-REPORT.md)
 
 ## Why Relay
 
@@ -38,7 +38,7 @@ The hybrid adapter accepts only a revocable approval capability containing the i
 
 - React + TypeScript + Vite.
 - Firebase JavaScript SDK (`firebase/ai`).
-- Gemini Developer API backend through Firebase AI Logic.
+- Gemini Developer API backend through Firebase AI Logic, with Gemini 3.5 Flash-Lite as the cloud fallback.
 - `ONLY_ON_DEVICE` for original-note analysis.
 - `PREFER_ON_DEVICE` for the approved-copy handoff request.
 - Firebase App Check with a web attestation provider before enabling cloud-capable generation.
@@ -90,7 +90,7 @@ The on-device path depends on Chrome desktop support for the Prompt API and a co
 
 ## Evaluator walkthrough
 
-1. Open the supplied test URL or run the local preview with `npm run build` and `npm run preview -- --host localhost --port 4174`.
+1. Open the [free evaluator preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) or run the local preview with `npm run build` and `npm run preview -- --host localhost --port 4174`.
 2. In desktop Chrome, choose **Try A1**. Analyze on device, inspect the exclusions, and approve the exact sharing copy. Generate the handoff and check the source badge.
 3. Review and edit the four fields, confirm **Review complete**, and copy the result. **Clear incident** starts a fresh workspace.
 4. Use **Prepare manually** if the local model is unavailable. Continue manually if App Check, quota, or network conditions block hybrid generation.

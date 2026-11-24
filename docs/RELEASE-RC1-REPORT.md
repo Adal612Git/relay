@@ -1,48 +1,46 @@
 # Relay by Lotos · Release Candidate 1
 
-**NO-GO for hackathon submission. GO for local manual rehearsal.** The release candidate is integrated and the deterministic checks passed. Firebase inference, server-side App Check and live cloud privacy evidence require a configured Firebase web app.
+**GO for the technical release and demo recording.** The hosted preview runs Firebase AI Logic on the no-cost Spark plan. Record the English demo and attach the public YouTube link before submitting the Devpost entry.
 
 | Item | Evidence |
 | --- | --- |
-| Branch | [release/relay-rc1](https://github.com/Adal612Git/relay/tree/release/relay-rc1) |
-| Integrated application SHA | [41a0d104b078dd3d55e68c74e794e165c23c4b37](https://github.com/Adal612Git/relay/commit/41a0d104b078dd3d55e68c74e794e165c23c4b37) |
-| Exact current RC1 head and CI | [PR #7 commits](https://github.com/Adal612Git/relay/pull/7/commits) · [final-head checks](https://github.com/Adal612Git/relay/pull/7/checks) |
-| Integrated application CI | [Run 45379266246](https://github.com/Adal612Git/relay/actions/runs/45379266246). Quality, Unit Tests, Build and Browser Tests all passed on Ubuntu 24.04. |
-| Local production preview | [http://localhost:4174](http://localhost:4174) |
-| Public repository and license | [GitHub](https://github.com/Adal612Git/relay) · [Apache 2.0](../LICENSE) |
+| Release branch and exact head | [release/relay-rc1](https://github.com/Adal612Git/relay/tree/release/relay-rc1) · [PR #7 commits](https://github.com/Adal612Git/relay/pull/7/commits) |
+| CI on release head | [PR #7 checks](https://github.com/Adal612Git/relay/pull/7/checks) |
+| Free evaluator preview | [Relay RC1 on Firebase Hosting](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · Hosting version `f3758dfb626ea192` · expires December 24, 2026 at 05:08 Guadalajara time. |
+| Local preview | [http://localhost:4174/](http://localhost:4174/) |
+| Repository and license | [Public GitHub repository](https://github.com/Adal612Git/relay) · [Apache 2.0](../LICENSE) |
 
 ## Integration and files
 
-- [PR #1](https://github.com/Adal612Git/relay/pull/1) supplies the RC1 base at `12926af`, including its reproducible lockfile, CI, revocable approval and request isolation.
-- [PR #3](https://github.com/Adal612Git/relay/pull/3) supplies the boundary tests. RC1 corrects the mixed-line expectation to retain the incident event.
-- [PR #4](https://github.com/Adal612Git/relay/pull/4) supplies the adversarial privacy tests. RC1 extends redaction and adds credential, IPv6, Unicode and exclusion regressions.
-- [PR #5](https://github.com/Adal612Git/relay/pull/5) supplies the A2/A3 fixtures and integrity tests. RC1 uses one fixture source for all scenarios and checks forbidden claims against actual outputs in the real-service suite.
-- [PR #6](https://github.com/Adal612Git/relay/pull/6) supplies the review and narrow-viewport improvements, adapted to preserve PR #1's request isolation.
-- The complete [file and commit diff](https://github.com/Adal612Git/relay/pull/7/files) covers application and styling in `src/`, canonical scenarios in `examples/`, unit and Playwright tests in `src/` and `tests/`, Vite and Playwright configuration, the lockfile and workflow from PR #1, plus the README and release documents.
-- Local changes were protected by creating a separate worktree at `C:\Users\Rick\Documents\LotosTechnologies\RelayByLotos-rc1`. The original checkout retained its six tracked edits and five untracked files.
+- [PR #1](https://github.com/Adal612Git/relay/pull/1) supplies the base at `12926af`, including the lockfile, four-job CI, revocable approval and request isolation.
+- [PR #3](https://github.com/Adal612Git/relay/pull/3) supplies boundary tests. RC1 preserves incident facts on lines with redacted identifiers.
+- [PR #4](https://github.com/Adal612Git/relay/pull/4) supplies adversarial privacy tests. RC1 adds credential, IPv6, Unicode and exclusion coverage.
+- [PR #5](https://github.com/Adal612Git/relay/pull/5) supplies the A2/A3 fixtures and integrity tests. The canonical fixtures now drive the product, tests and demo. The live suite checks forbidden claims against model responses.
+- [PR #6](https://github.com/Adal612Git/relay/pull/6) supplies review and narrow-viewport improvements, adapted to preserve request isolation.
+- `41a0d10` integrates the fixes and `dee1224` adds the first RC1 report and test gates. The release-head commit pins the stable Gemini fallback, adds `firebase.json`, strengthens the live integration assertions, and records the verified release. [Full file diff](https://github.com/Adal612Git/relay/pull/7/files) · [Commit history](https://github.com/Adal612Git/relay/pull/7/commits)
+- The original local checkout retained its six tracked edits and five untracked files. Work took place in the separate `C:\Users\Rick\Documents\LotosTechnologies\RelayByLotos-rc1` worktree.
 
-## Acceptance evidence
+## Results
 
 | Check | Result |
 | --- | --- |
-| Clean dependencies, format, essential files, TypeScript and production build | **PASS.** `npm ci` installed 258 packages. Quality and Build completed on the integrated application SHA. |
-| Unit, component and SDK adapter | **PASS.** 79 executed, 79 passed, 0 failed across 7 files. Includes revocation, races, invalid responses, recovery, boundaries and fixture integrity. [Unit artifacts](https://github.com/Adal612Git/relay/actions/runs/45379266246) |
-| Chromium workflow | **PASS.** 3 executed, 3 passed, 0 failed in CI. Includes 320 px, keyboard and axe, real OS clipboard, denied clipboard recovery, manual operation offline and storage checks. [Browser artifacts](https://github.com/Adal612Git/relay/actions/runs/45379266246) |
-| Regression cycle | Baseline recorded four targeted test failures. PR #3 expected discarded facts, and PR #4 reproduced three missing detections. The integrated tests pass. The Windows clipboard check now accepts native CRLF line breaks. |
-| Secrets and dependencies | GitHub secret-scanning API returned zero alerts for the repository. `npm audit --audit-level=high` reported zero known vulnerabilities at verification time. |
-| Real Firebase, including A1–A3 | **BLOCKED.** `npm run test:integration` exited 2 in preflight. No Firebase cases ran, so the live tally is 0 executed, 0 passed, 0 failed. |
-| Real local model and offline inference | **BLOCKED.** Chrome desktop 158.0.8127.88 is installed. The integrated Firebase test needs the web app configuration before it can verify model initialization, metadata and offline inference. |
-| Real hybrid and server App Check | **BLOCKED.** Need a working Firebase app and genuine reCAPTCHA Enterprise attestation. The integration tests require a successful cloud response with attestation and a server rejection without it. |
-| Incident data in network and storage | **PASS** for the manual browser workflow and deterministic adapter boundary. **BLOCKED** for a real Firebase run. The opt-in suite tests the actual approved request, excluded markers and absence of inference traffic from private offline analysis. |
-| Public judge access and submission | **BLOCKED.** A Firebase-enabled staging deployment and its testing URL are required. Publication and Devpost submission remain release steps. |
+| Clean install, formatting, essential files, TypeScript and production build | **PASS.** The hosted build was compiled in staging mode. The local build was compiled with the localhost app registration. |
+| Unit and component tests, including SDK adapter doubles | **PASS.** 79 passed, 0 failed, across 7 files. Covers limits, concurrency, revocation, invalid JSON, privacy and recovery. |
+| Chromium workflow | **PASS.** 3 passed, 0 failed. Includes keyboard, axe at 320 px, real clipboard, clipboard denial and the offline manual workflow. |
+| Firebase AI Logic private analysis | **PASS.** Chrome 158 on Windows initialized Gemini Nano, analyzed A1 online, then performed a second analysis with the open tab offline. Zero cloud inference requests and zero requests containing the synthetic private markers. |
+| Hybrid inference on device | **PASS.** Chrome generated the approved A1 handoff with `PREFER_ON_DEVICE`. The SDK reported `ON_DEVICE` and the browser made zero cloud inference calls during the tested workflow. |
+| Hybrid cloud fallback and A1–A3 fidelity | **PASS.** All three canonical cases generated live responses with Gemini 3.5 Flash-Lite and SDK metadata `IN_CLOUD`. Assertions verified four fields, the recorded timestamps and the absence of each fixture's forbidden claims and excluded markers. Operators still review factual meaning. |
+| App Check | **PASS.** The hosted app uses a score-based Enterprise key restricted to the preview domain and server enforcement is active. The approved synthetic request succeeded with HTTP 200, and the same request without attestation received HTTP 401. |
+| Live privacy | **PASS for tested synthetic inputs.** Only the exact approved copy appeared as the variable incident payload. The approved requests contained no excluded markers or original-note block. The suite checked the browser URL, Web Storage, IndexedDB and console for incident content. |
+| Real integration | **PASS.** 4 passed, 0 failed in the final live suite. An earlier A1 attempt stopped at authorization before a generation request. An independent real run then confirmed HTTP 200 with App Check and HTTP 401 without it. |
+| Secrets and dependencies | Public configuration is in ignored local env files. No App Check debug token is used. GitHub secret-scanning returned zero alerts after the authenticated rollout, and the dependency audit reported zero known vulnerabilities. |
+| Evaluator access | **PASS.** The preview works in a fresh browser without an account and expires after Devpost judging ends on December 16. Firebase billing is disabled. [Official Devpost dates](https://firebasehybridaihackathon.devpost.com/details/dates) |
 
-Pattern detection covers known representations and can miss context-sensitive identifiers. Mandatory review remains the release gate for sharing. Structured responses and timestamp checks reduce some factual errors. Operators still verify all four fields.
+Pattern-based detection can miss context-sensitive identifiers. Human approval is required at the sharing boundary, and separate final review is required before copying. The deployed or local page must be open for offline analysis. The browser may need to download its model before the first inference. Spark usage remains subject to the service quota. [Firebase pricing](https://firebase.google.com/docs/ai-logic/pricing?api=dev)
 
-## Re-run and record
+## Reproduce and record
 
-From the RC1 worktree:
-
-```sh
+```powershell
 npm ci
 npm run format:check
 npm run check:files
@@ -51,10 +49,11 @@ npm test
 npm run build
 npx playwright install chromium
 npm run test:e2e
+$env:RELAY_INTEGRATION_BASE_URL = 'https://relay-by-lotos--rc1-2uvff4zh.web.app'
+$env:RELAY_CHROME_TEST_PROFILE = Join-Path $env:TEMP 'relay-rc1-chrome-profile'
 npm run test:integration
-npm run preview -- --host localhost --port 4174 --strictPort
 ```
 
-The Relay Git history and repository configuration contained no usable web configuration, and the Firebase CLI reported that it had no authenticated session. The remaining setup is a Firebase web app with the Gemini Developer API enabled, public web configuration, and a reCAPTCHA Enterprise key for an authorized test origin with App Check enforced for Firebase AI Logic. Add the public values to the ignored `.env.local` and rebuild, or provide the approved staging URL for the live tests. [Firebase setup](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started) · [App Check setup](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider)
+For a local production preview with the localhost registration, run `npm run build` and `npm run preview -- --host localhost --port 4174 --strictPort`. The hosted build uses `.env.staging.local`, prepared from its separate Firebase web app. To redeploy the same channel after validation, run `npm run build -- --mode staging` and `npx firebase-tools hosting:channel:deploy rc1 --expires 30d --project relay-by-lotos`.
 
-Open the local preview, choose **Try A1**, and follow the [English 2:40 demo script](DEMO-SCRIPT.md). For an immediate rehearsal use **Prepare manually**, review the exclusions and enter the A1 handoff. Record the AI scenes after confirming the actual source and validating the corresponding integration gate.
+Open the QA URL in desktop Chrome, preload the device model, clear the rehearsal incident, and follow the [English 2:40 script](DEMO-SCRIPT.md). Record the badge that appears during generation. Obtain a cloud clip with a browser without a local model if desired. A public YouTube demo and final submission approval remain the publication steps. [Devpost rules](https://firebasehybridaihackathon.devpost.com/rules)

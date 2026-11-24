@@ -1,7 +1,7 @@
 import { expect, test, chromium } from '@playwright/test';
 import { A1_ORIGINAL } from '../../src/lib/examples';
 
-test('Chrome analyzes private notes offline through Firebase ONLY_ON_DEVICE', async ({
+test('Firebase keeps private analysis offline and prefers Chrome for the approved handoff', async ({
   page: defaultPage,
   baseURL,
 }) => {
@@ -55,6 +55,16 @@ test('Chrome analyzes private notes offline through Firebase ONLY_ON_DEVICE', as
     await expect(
       page.getByRole('textbox', { name: 'Sharing copy', exact: true }),
     ).not.toHaveValue(/RAW-ORCHID|robin@example\.test/);
+    expect(cloudRequests).toBe(0);
+    expect(externalRequestsWithPrivateNotes).toBe(0);
+
+    await context.setOffline(false);
+    await page.getByRole('button', { name: 'Approve this text' }).click();
+    await page.getByRole('button', { name: 'Generate handoff' }).click();
+    await expect(page.locator('.source-tag')).toHaveText(
+      'Generated on this device',
+      { timeout: 90_000 },
+    );
     expect(cloudRequests).toBe(0);
     expect(externalRequestsWithPrivateNotes).toBe(0);
   } finally {

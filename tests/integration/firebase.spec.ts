@@ -15,6 +15,19 @@ for (const fixture of EXAMPLES) {
   test(`${fixture.id}: real cloud fallback, approved payload and response fidelity`, async ({
     page,
   }) => {
+    const incidentMarkers = [
+      ...fixture.expectedExclusions,
+      fixture.originalNotes[0],
+    ];
+    let incidentLogged = false;
+    page.on('console', (message) => {
+      if (
+        incidentMarkers.some((marker) =>
+          message.text().toLowerCase().includes(marker.toLowerCase()),
+        )
+      )
+        incidentLogged = true;
+    });
     await page.goto('/');
     await page.getByRole('button', { name: `Try ${fixture.id}` }).click();
     await page.getByRole('button', { name: 'Prepare manually' }).click();
@@ -28,8 +41,12 @@ for (const fixture of EXAMPLES) {
         endpoint.test(response.url()) && response.request().method() === 'POST',
       { timeout: 100_000 },
     );
+    const alert = page.getByRole('alert');
+    const failure = alert.waitFor({ timeout: 100_000 }).then(async () => {
+      throw new Error((await alert.textContent()) ?? 'Live inference failed');
+    });
     await page.getByRole('button', { name: 'Generate handoff' }).click();
-    const response = await cloud;
+    const response = await Promise.race([cloud, failure]);
     expect(response.status()).toBe(200);
     const request = response.request();
     const headers = await request.allHeaders();
@@ -73,6 +90,46 @@ for (const fixture of EXAMPLES) {
       ).toBe(false);
     for (const marker of fixture.expectedExclusions)
       expect(text.includes(marker.toLowerCase())).toBe(false);
+
+    const persistedIncident = await page.evaluate(async (markers) => {
+      function contains(value: unknown) {
+        const serialized = JSON.stringify(value)?.toLowerCase() ?? '';
+        return markers.some((marker) =>
+          serialized.includes(marker.toLowerCase()),
+        );
+      }
+      if (contains(location.href)) return true;
+      for (const storage of [localStorage, sessionStorage]) {
+        for (let index = 0; index < storage.length; index++) {
+          const key = storage.key(index);
+          if (key !== null && (contains(key) || contains(storage.getItem(key))))
+            return true;
+        }
+      }
+      for (const { name } of await indexedDB.databases()) {
+        if (!name) continue;
+        const db = await new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(name);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+        try {
+          for (const store of db.objectStoreNames) {
+            const persisted = await new Promise<boolean>((resolve, reject) => {
+              const request = db.transaction(store).objectStore(store).getAll();
+              request.onsuccess = () => resolve(contains(request.result));
+              request.onerror = () => reject(request.error);
+            });
+            if (persisted) return true;
+          }
+        } finally {
+          db.close();
+        }
+      }
+      return false;
+    }, incidentMarkers);
+    expect(persistedIncident).toBe(false);
+    expect(incidentLogged).toBe(false);
 
     if (fixture.id === 'A1') {
       // Same synthetic request and app identifiers with the attestation header omitted.

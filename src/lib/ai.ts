@@ -46,6 +46,10 @@ function approvedModel() {
   const { ai } = models();
   hybridModel ??= getGenerativeModel(ai, {
     mode: InferenceMode.PREFER_ON_DEVICE,
+    inCloudParams: {
+      model: 'gemini-3.5-flash-lite',
+      generationConfig: { responseMimeType: 'application/json' },
+    },
   });
   return hybridModel;
 }

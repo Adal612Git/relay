@@ -2,7 +2,7 @@
 
 ## Before recording
 
-Open [Relay locally](http://localhost:4174/) or an authorized staging URL in desktop Chrome. Use **Try A1**, the synthetic search incident in [the canonical fixture](../examples/a1.json). Clear the incident before the take. Use a clean browser window and keep the workspace in frame.
+Open the [free Relay preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) or [Relay locally](http://localhost:4174/) in desktop Chrome. Use **Try A1**, the synthetic search incident in [the canonical fixture](../examples/a1.json). Clear the incident before the take. Use a clean browser window and keep the workspace in frame.
 
 Run the real Firebase integration checks from the README before recording the AI segments. Preload Chrome's model once, clear the rehearsal incident, and keep the browser open for the take. Only describe the source indicated by the actual handoff. The [release report](RELEASE-RC1-REPORT.md) tracks which scenes still need verification.
 
@@ -18,6 +18,6 @@ Run the real Firebase integration checks from the README before recording the AI
 
 ## Recording gate
 
-If an AI step is blocked, rehearse using **Prepare manually** and type the four fields from the A1 fixture. Identify that take as a manual workflow rehearsal. Wait for real Firebase and App Check evidence before recording the AI segments for submission.
+If an AI step is blocked, rehearse using **Prepare manually** and type the four fields from the A1 fixture. Identify that take as a manual workflow rehearsal. Return to the verified hosted preview for the AI segments after resolving the browser or network error.
 
 For a cloud fallback insert, use the attested staging origin or isolated test app from the README in a Chromium session without a local model. Use the same A1 fixture and show the real cloud badge. Trim model wait time in editing while preserving the actual action and result. The public submission video should remain under three minutes. [Devpost rules](https://firebasehybridaihackathon.devpost.com/rules)
