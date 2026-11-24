@@ -43,3 +43,21 @@ Acceptance: preserve 44 px primary targets, visible keyboard focus, no horizonta
 Use the local UI stack for headings and prose and the technical stack for incident notes and counters. Brand and section headings use shared CSS variables matching `design/tokens.json`: 32/22 px on desktop and 27/19 px at narrow widths. Heading line heights are 1.05 for the brand and 1.2 for sections; editor text uses 1.6. Keep text sizes in CSS pixels and allow browser zoom. Layout spacing belongs to Workspace; do not use the foundation layout snapshot to override its newer spacing.
 
 CI caveat: the current workflow filters pull requests and pushes to `main`. Visual drafts targeting `release/relay-rc1` do not automatically qualify under that filter. Integration must arrange an explicit run or an approved workflow adjustment and verify the integrated SHA; RC1's green run is not visual acceptance.
+
+## Extended contrast acceptance
+
+The following additional pairs are calculated from the foundation token values and current status surfaces using WCAG sRGB relative luminance. They are static checks, not computed browser styles.
+
+| Pair | Ratio |
+| --- | ---: |
+| text / input | 14.72:1 |
+| muted / input | 8.87:1 |
+| jade / brandSurface | 7.16:1 |
+| jade / #1c342e | 7.91:1 |
+| muted / #202e37 | 7.16:1 |
+| disabled / disabledSurface | 5.81:1 |
+| focus / input | 9.19:1 |
+| border / surface | 3.36:1 |
+| danger / surface | 8.37:1 |
+
+Require at least 4.5:1 for normal text and 3:1 for meaningful control boundaries and focus indicators against adjacent surfaces. Disabled controls are exempt from the WCAG contrast requirement; retain their readable treatment without implying availability. Decorative dividers are not control boundaries. Verify hover, focus, approval, error and disabled combinations in the integrated browser build, including forced colors. Do not use these calculations as a substitute for axe or manual keyboard review.
