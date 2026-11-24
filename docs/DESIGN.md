@@ -37,3 +37,9 @@ Static WCAG contrast calculations for selected token pairs (not a browser audit)
 | focus / surface | 8.50:1 |
 
 Acceptance: preserve 44 px primary targets, visible keyboard focus, no horizontal overflow at 320 px, readable 200% zoom, offline fonts, unchanged privacy and approval behavior. Require fresh CI and browser review before visual acceptance.
+
+## Typography contract
+
+Use the local UI stack for headings and prose and the technical stack for incident notes and counters. Brand and section headings use shared CSS variables matching `design/tokens.json`: 32/22 px on desktop and 27/19 px at narrow widths. Heading line heights are 1.05 for the brand and 1.2 for sections; editor text uses 1.6. Keep text sizes in CSS pixels and allow browser zoom. Layout spacing belongs to Workspace; do not use the foundation layout snapshot to override its newer spacing.
+
+CI caveat: the current workflow filters pull requests and pushes to `main`. Visual drafts targeting `release/relay-rc1` do not automatically qualify under that filter. Integration must arrange an explicit run or an approved workflow adjustment and verify the integrated SHA; RC1's green run is not visual acceptance.
