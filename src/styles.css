@@ -255,6 +255,10 @@ h1 {
   gap: 10px;
 }
 
+.panel-heading > div {
+  min-width: 0;
+}
+
 .panel-heading {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -332,6 +336,7 @@ textarea::placeholder {
 
 .editor-caption {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: flex-end;
   gap: 8px;
@@ -463,6 +468,11 @@ textarea::placeholder {
   display: flex;
   align-items: baseline;
   gap: 7px;
+}
+
+.excluded-box li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .excluded-box li + li,
@@ -604,6 +614,7 @@ progress {
   }
 
   .topbar {
+    flex-wrap: wrap;
     gap: 10px;
     padding-bottom: 15px;
   }
@@ -642,6 +653,10 @@ progress {
 
   .handoff-fields {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-caption .error-text {
+    flex-basis: 100%;
   }
 
   .sample-bar {
