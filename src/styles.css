@@ -371,11 +371,11 @@ textarea::placeholder {
   gap: 4px;
 }
 
-.sample-actions button,
-.line-link {
-  border-color: #485f69;
-  background: #22343e;
-  color: #d5e2e7;
+.sample-actions button:not(:disabled),
+.line-link:not(:disabled) {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -408,8 +408,8 @@ textarea::placeholder {
 }
 
 .secondary:not(:disabled):hover,
-.sample-actions button:hover,
-.line-link:hover,
+.sample-actions button:not(:disabled):hover,
+.line-link:not(:disabled):hover,
 .quiet:not(:disabled):hover {
   background: #2e414d;
 }
@@ -450,8 +450,8 @@ textarea::placeholder {
 }
 
 .excluded-box ul {
-  max-height: 104px;
-  padding: 3px 3px 3px 0;
+  max-height: 160px;
+  padding: 6px;
   list-style: none;
   overflow: auto;
 }
@@ -520,6 +520,18 @@ textarea::placeholder {
   font-weight: 650;
 }
 
+.handoff-field textarea {
+  line-height: 1.65;
+}
+
+textarea:focus-visible {
+  border-color: var(--violet);
+}
+
+textarea[readonly] {
+  background: var(--surface);
+}
+
 .handoff-actions {
   display: flex;
   justify-content: space-between;
@@ -539,6 +551,7 @@ textarea::placeholder {
 }
 
 .review-check input {
+  flex: 0 0 19px;
   width: 19px;
   height: 19px;
   margin: 0;
@@ -547,6 +560,11 @@ textarea::placeholder {
 
 .review-check:has(input:disabled) {
   color: var(--muted);
+  cursor: not-allowed;
+}
+
+.review-check:has(input:checked:not(:disabled)) {
+  color: var(--jade);
 }
 
 .copy-fallback {
