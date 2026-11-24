@@ -22,6 +22,12 @@
   --danger-surface: #342327;
   --ui: 'Segoe UI', system-ui, sans-serif;
   --mono: Consolas, ui-monospace, monospace;
+  --type-brand: 32px;
+  --type-section: 22px;
+  --type-brand-narrow: 27px;
+  --type-section-narrow: 19px;
+  --leading-brand: 1.05;
+  --leading-heading: 1.2;
   --radius-panel: 8px;
   --radius-control: 6px;
   --radius-status: 6px;
@@ -127,10 +133,10 @@ button:disabled {
 
 h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: var(--type-brand);
   font-weight: 670;
   letter-spacing: -0.045em;
-  line-height: 1.05;
+  line-height: var(--leading-brand);
 }
 
 .session-tag,
@@ -261,6 +267,10 @@ h1 {
   gap: 10px;
 }
 
+.panel-heading > div {
+  min-width: 0;
+}
+
 .panel-heading {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -293,10 +303,10 @@ h1 {
 
 h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: var(--type-section);
   font-weight: 650;
   letter-spacing: -0.025em;
-  line-height: 1.2;
+  line-height: var(--leading-heading);
 }
 
 h3 {
@@ -338,6 +348,7 @@ textarea::placeholder {
 
 .editor-caption {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: flex-end;
   gap: 8px;
@@ -380,11 +391,11 @@ textarea::placeholder {
   gap: 4px;
 }
 
-.sample-actions button,
-.line-link {
-  border-color: #485f69;
-  background: #22343e;
-  color: #d5e2e7;
+.sample-actions button:not(:disabled),
+.line-link:not(:disabled) {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -417,8 +428,8 @@ textarea::placeholder {
 }
 
 .secondary:not(:disabled):hover,
-.sample-actions button:hover,
-.line-link:hover,
+.sample-actions button:not(:disabled):hover,
+.line-link:not(:disabled):hover,
 .quiet:not(:disabled):hover {
   background: #2e414d;
 }
@@ -459,8 +470,8 @@ textarea::placeholder {
 }
 
 .excluded-box ul {
-  max-height: 104px;
-  padding: 3px 3px 3px 0;
+  max-height: 160px;
+  padding: 6px;
   list-style: none;
   overflow: auto;
 }
@@ -469,6 +480,11 @@ textarea::placeholder {
   display: flex;
   align-items: baseline;
   gap: 7px;
+}
+
+.excluded-box li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .excluded-box li + li,
@@ -529,6 +545,18 @@ textarea::placeholder {
   font-weight: 650;
 }
 
+.handoff-field textarea {
+  line-height: 1.65;
+}
+
+textarea:focus-visible {
+  border-color: var(--violet);
+}
+
+textarea[readonly] {
+  background: var(--surface);
+}
+
 .handoff-actions {
   display: flex;
   justify-content: space-between;
@@ -548,6 +576,7 @@ textarea::placeholder {
 }
 
 .review-check input {
+  flex: 0 0 19px;
   width: 19px;
   height: 19px;
   margin: 0;
@@ -556,6 +585,11 @@ textarea::placeholder {
 
 .review-check:has(input:disabled) {
   color: var(--muted);
+  cursor: not-allowed;
+}
+
+.review-check:has(input:checked:not(:disabled)) {
+  color: var(--jade);
 }
 
 .copy-fallback {
@@ -610,6 +644,7 @@ progress {
   }
 
   .topbar {
+    flex-wrap: wrap;
     gap: 10px;
     padding-bottom: 15px;
   }
@@ -630,7 +665,7 @@ progress {
   }
 
   h1 {
-    font-size: 27px;
+    font-size: var(--type-brand-narrow);
   }
 
   .panel {
@@ -643,11 +678,15 @@ progress {
   }
 
   h2 {
-    font-size: 19px;
+    font-size: var(--type-section-narrow);
   }
 
   .handoff-fields {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-caption .error-text {
+    flex-basis: 100%;
   }
 
   .sample-bar {
