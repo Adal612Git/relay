@@ -33,6 +33,9 @@ function prepare() {
 function approve() {
   fireEvent.click(button('Approve this text'));
 }
+function go(stage: 'Capture' | 'Review' | 'Handoff') {
+  fireEvent.click(button(stage));
+}
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
@@ -52,17 +55,24 @@ describe('operator workflow and stale requests', () => {
   it('blocks generation without approval and invalidates permission on an edit', () => {
     render(<App />);
     prepare();
+    go('Handoff');
     expect(button('Generate handoff').disabled).toBe(true);
     fireEvent.click(button('Generate handoff'));
     expect(ai.generate).not.toHaveBeenCalled();
+    go('Review');
     approve();
+    go('Handoff');
     expect(button('Generate handoff').disabled).toBe(false);
+    go('Review');
     change('Sharing copy', field('Sharing copy').value + '\nReviewed again.');
+    expect(screen.getByText('Approval revoked')).toBeTruthy();
+    go('Handoff');
     expect(button('Generate handoff').disabled).toBe(true);
   });
   it('manual preparation and manual output never call AI', async () => {
     render(<App />);
     prepare();
+    go('Handoff');
     for (const [label, value] of Object.entries({
       'Observed impact': 'One test failed.',
       'Actions and results': 'No action recorded.',
@@ -95,16 +105,20 @@ describe('operator workflow and stale requests', () => {
       expect(requireApprovedCopy(copy)).toBe(draft);
       throw new Error('quota denied: private diagnostic');
     });
+    go('Handoff');
     change('Observed impact', 'My saved manual draft.');
+    go('Review');
     approve();
+    go('Handoff');
     await act(async () => {
       fireEvent.click(button('Generate handoff'));
     });
-    expect(field('Sharing copy').value).toBe(draft);
     expect(field('Observed impact').value).toBe('My saved manual draft.');
     expect(screen.getByRole('alert').textContent).not.toContain(
       'private diagnostic',
     );
+    go('Review');
+    expect(field('Sharing copy').value).toBe(draft);
   });
   it('a response from the previous incident cannot overwrite a newer request or release its busy state', async () => {
     const old = deferred<AiResult<LocalReview>>();
@@ -114,17 +128,19 @@ describe('operator workflow and stale requests', () => {
       .mockReturnValueOnce(current.promise);
     render(<App />);
     fireEvent.click(button('Try A1'));
-    fireEvent.click(button('Analyze on this device'));
+    fireEvent.click(button('Analyze locally'));
     fireEvent.click(button('Try A2'));
-    fireEvent.click(button('Analyze on this device'));
+    fireEvent.click(button('Analyze locally'));
     await act(async () =>
       old.resolve({
         value: { sharingCopy: 'STALE', findings: ['OLD RESPONSE'] },
         source: 'on_device',
       }),
     );
+    expect(button('Analyze locally').disabled).toBe(true);
+    expect(screen.getByText('Working on this device…')).toBeTruthy();
+    go('Review');
     expect(field('Sharing copy').value).toBe('');
-    expect(button('Working on this device…').disabled).toBe(true);
     await act(async () =>
       current.resolve({
         value: { findings: ['NEW RESPONSE'] },
@@ -144,6 +160,7 @@ describe('operator workflow and stale requests', () => {
     render(<App />);
     prepare();
     approve();
+    go('Handoff');
     fireEvent.click(button('Generate handoff'));
     change('Observed impact', 'Current manual review.');
     await act(async () =>
@@ -157,7 +174,7 @@ describe('operator workflow and stale requests', () => {
     ai.analyze.mockReturnValue(request.promise);
     render(<App />);
     fireEvent.click(button('Try A1'));
-    fireEvent.click(button('Analyze on this device'));
+    fireEvent.click(button('Analyze locally'));
     fireEvent.click(button('Prepare manually'));
     const draft = field('Sharing copy').value;
     await act(async () =>
@@ -171,10 +188,11 @@ describe('operator workflow and stale requests', () => {
     ai.analyze.mockReturnValue(request.promise);
     render(<App />);
     fireEvent.click(button('Try A1'));
-    fireEvent.click(button('Analyze on this device'));
+    fireEvent.click(button('Analyze locally'));
     fireEvent.click(button('Clear incident'));
     await act(async () => request.reject(new Error('offline')));
     expect(field('Original incident notes').value).toBe('');
+    go('Review');
     expect(field('Sharing copy').value).toBe('');
     expect(screen.queryByRole('alert')).toBeNull();
   });
@@ -196,6 +214,7 @@ describe('operator workflow and stale requests', () => {
     render(<App />);
     prepare();
     approve();
+    go('Handoff');
     await act(async () => {
       fireEvent.click(button('Generate handoff'));
     });
@@ -219,6 +238,24 @@ describe('operator workflow and stale requests', () => {
       screen.queryByRole('textbox', { name: 'Selectable handoff text' }),
     ).toBeNull();
     expect(button('Copy handoff').disabled).toBe(true);
+    go('Capture');
     expect(field('Original incident notes').value).toBe(A1_ORIGINAL);
+  });
+
+  it('keeps the approved snapshot and editable handoff while navigating between stages', async () => {
+    render(<App />);
+    prepare();
+    const draft = field('Sharing copy').value;
+    approve();
+    go('Capture');
+    expect(field('Original incident notes').value).toBe(A1_ORIGINAL);
+    go('Handoff');
+    expect(button('Generate handoff').disabled).toBe(false);
+    await act(async () => fireEvent.click(button('Generate handoff')));
+    expect(screen.getByText('ON_DEVICE')).toBeTruthy();
+    go('Review');
+    expect(field('Sharing copy').value).toBe(draft);
+    go('Handoff');
+    expect(field('Observed impact').value).toBe(A1_EXPECTED.observedImpact);
   });
 });

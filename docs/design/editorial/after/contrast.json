@@ -1,0 +1,50 @@
+[
+  {
+    "fg": "ink",
+    "bg": "paper",
+    "min": 4.5,
+    "ratio": 14.08
+  },
+  {
+    "fg": "muted",
+    "bg": "paper",
+    "min": 4.5,
+    "ratio": 5.29
+  },
+  {
+    "fg": "document",
+    "bg": "olive-dark",
+    "min": 4.5,
+    "ratio": 9.4
+  },
+  {
+    "fg": "warning",
+    "bg": "paper",
+    "min": 4.5,
+    "ratio": 7.12
+  },
+  {
+    "fg": "success",
+    "bg": "privacy-paper",
+    "min": 4.5,
+    "ratio": 7.48
+  },
+  {
+    "fg": "error",
+    "bg": "error-paper",
+    "min": 4.5,
+    "ratio": 6.63
+  },
+  {
+    "fg": "control-rule",
+    "bg": "paper",
+    "min": 3,
+    "ratio": 3.44
+  },
+  {
+    "fg": "control-rule",
+    "bg": "document",
+    "min": 3,
+    "ratio": 3.83
+  }
+]

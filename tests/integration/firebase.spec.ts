@@ -1,4 +1,5 @@
 import { chromium, expect, test as base } from '@playwright/test';
+import { join } from 'node:path';
 import { EXAMPLES } from '../../src/lib/examples';
 import { validateHandoffFidelity, handoffAsText } from '../../src/lib/relay';
 
@@ -56,6 +57,9 @@ for (const fixture of EXAMPLES) {
       .getByRole('textbox', { name: 'Sharing copy', exact: true })
       .inputValue();
     await page.getByRole('button', { name: 'Approve this text' }).click();
+    await page
+      .getByRole('button', { name: 'Open handoff', exact: true })
+      .click();
 
     const cloud = page.waitForResponse(
       (response) =>
@@ -156,6 +160,12 @@ for (const fixture of EXAMPLES) {
     expect(incidentLogged).toBe(false);
 
     if (fixture.id === 'A1') {
+      const evidence = process.env.RELAY_EDITORIAL_EVIDENCE_DIR;
+      if (evidence)
+        await page.screenshot({
+          path: join(evidence, 'real-cloud-handoff.png'),
+          fullPage: true,
+        });
       // Same synthetic request and app identifiers with the attestation header omitted.
       // The server must reject the request. Never print headers or payloads.
       const publicHeaders = Object.fromEntries(

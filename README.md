@@ -4,7 +4,7 @@
 
 Relay is a browser-based incident workspace for technical support and operations teams. It helps an outgoing operator preserve the timeline, distinguish facts from hypotheses, remove information from a sharing copy, and prepare a concise handoff for the next shift.
 
-> **The final build is verified for local demo recording.** Chrome offline analysis, both inference sources and App Check passed on the final local build. The existing Firebase Hosting preview serves RC1. [Final release evidence](docs/FINAL-RELEASE-REPORT.md) · [Open the RC1 preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/)
+> **LOTOS Editorial is available in the local build.** Capture, Review, and Handoff share one incident session. Chrome offline analysis, both inference sources, and App Check were verified from the new workspace. The existing Firebase Hosting preview serves RC1. [Design](docs/LOTOS-EDITORIAL.md) · [QA](docs/EDITORIAL-QA.md) · [Open the RC1 preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/)
 
 ## Why Relay
 
@@ -91,7 +91,7 @@ The on-device path depends on Chrome desktop support for the Prompt API and a co
 ## Evaluator walkthrough
 
 1. Open the [free evaluator preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) or run the local preview with `npm run build` and `npm run preview -- --host localhost --port 4174`.
-2. In desktop Chrome, choose **Try A1**. Analyze on device, inspect the exclusions, and approve the exact sharing copy. Generate the handoff and check the source badge.
+2. In desktop Chrome, choose **A1** in **Capture** and select **Analyze locally**. In **Review**, inspect the exclusions and approve the exact sharing copy. Open **Handoff**, generate the draft, and check the inference source. [LOTOS Editorial](docs/LOTOS-EDITORIAL.md)
 3. Review and edit the four fields, confirm **Review complete**, and copy the result. **Clear incident** starts a fresh workspace.
 4. Use **Prepare manually** if the local model is unavailable. Continue manually if App Check, quota, or network conditions block hybrid generation.
 

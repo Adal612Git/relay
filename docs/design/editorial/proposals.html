@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LOTOS Editorial · composition studies</title>
+<style>
+  @font-face { font-family: Geist; src: url('../../../public/fonts/Geist-Variable.woff2'); font-weight: 100 900; }
+  @font-face { font-family: Mono; src: url('../../../public/fonts/GeistMono-Variable.woff2'); font-weight: 100 900; }
+  * { box-sizing: border-box; }
+  :root { --paper: #f4f3ed; --ink: #222420; --olive: #414a28; --rule: #d1d2c7; --muted: #62665b; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 Geist, Arial, sans-serif; }
+  .frame { max-width: 1496px; margin: auto; padding: 34px 52px; }
+  .meta, .rail, .margin dt, .doc h2, .counter { font: 550 11px/1.5 Mono, monospace; letter-spacing: .04em; text-transform: uppercase; }
+  .masthead { display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid var(--ink); padding: 0 0 18px; }
+  .wordmark { font-size: 49px; letter-spacing: -.10em; font-weight: 760; line-height: .95; }
+  .wordmark span { color: #747d42; }
+  .masthead .system { margin-left: auto; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: 152px minmax(0, 1fr) 232px; gap: 28px; padding-top: 31px; }
+  .rail { display: flex; flex-direction: column; gap: 26px; align-self: stretch; }
+  .rail ol { list-style: none; margin: 0; padding: 0; }
+  .rail li { padding: 13px 9px; border-top: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
+  .rail li[aria-current] { background: var(--olive); color: white; }
+  .rail footer { margin-top: auto; border-top: 1px solid var(--rule); padding-top: 14px; color: var(--olive); }
+  .title { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+  h1 { font-size: clamp(37px, 4.5vw, 62px); font-weight: 650; line-height: .98; letter-spacing: -.075em; margin: 8px 0 14px; }
+  p { margin: 0; }
+  .title p { color: var(--muted); }
+  .number { font-size: 68px; line-height: 1; font-weight: 350; letter-spacing: -.10em; color: var(--olive); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; background: white; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
+  .doc { min-width: 0; display: grid; grid-template-rows: auto 1fr auto; }
+  .doc + .doc { border-left: 1px solid var(--rule); }
+  .doc h2 { margin: 0; padding: 12px 20px; border-bottom: 1px solid var(--rule); }
+  .note { margin: 0; font: 400 12px/1.85 Mono, monospace; padding: 19px 20px; min-height: 230px; white-space: pre-wrap; }
+  mark { color: var(--ink); background: #f0e6c3; text-decoration: underline; text-decoration-color: #8a6e28; text-underline-offset: 3px; }
+  .counter { padding: 8px 20px; text-align: right; color: var(--muted); }
+  .annotations { border-bottom: 1px solid var(--rule); padding: 14px 0; }
+  .annotations p { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; padding-top: 7px; }
+  .ref { font: 550 11px/1.5 Mono, monospace; color: var(--olive); text-decoration: underline; }
+  .actions { padding-top: 16px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  button { border: 1px solid var(--olive); padding: 10px 16px; font: 600 14px Geist, sans-serif; background: var(--olive); color: white; }
+  .pending { color: #604c15; border-left: 3px solid #c7a84a; padding-left: 9px; }
+  .margin { align-self: start; background: #edeee4; }
+  .margin h2 { display: flex; align-items: center; gap: 9px; margin: 0; padding: 11px 16px; background: var(--olive); color: white; font: 550 11px/1.5 Mono, monospace; letter-spacing: .05em; text-transform: uppercase; }
+  .square { display: inline-block; width: 8px; height: 8px; background: #d9ddbd; }
+  .margin dl { padding: 0 16px; margin: 0; }
+  .margin dl div { border-bottom: 1px solid #ced0bd; padding: 12px 0; }
+  .margin dt { color: var(--muted); }
+  .margin dd { margin: 3px 0 0; font-size: 13px; font-weight: 600; }
+  .margin p { font-size: 12px; padding: 12px 16px; color: var(--olive); }
+  .status { border-top: 1px solid var(--rule); padding-top: 11px; margin-top: 25px; color: var(--muted); }
+  [data-layout='galley'] .layout { grid-template-columns: minmax(0, 1fr) 265px; gap: 24px 48px; max-width: 1090px; margin-inline: auto; }
+  [data-layout='galley'] .rail { grid-column: 1 / -1; }
+  [data-layout='galley'] .rail ol { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+  [data-layout='galley'] .rail footer { display: none; }
+  [data-layout='galley'] .compare { display: block; background: none; }
+  [data-layout='galley'] .doc { grid-template-columns: 160px 1fr; grid-template-rows: auto; align-items: start; }
+  [data-layout='galley'] .doc + .doc { border: 0; border-top: 1px solid var(--rule); background: white; }
+  [data-layout='galley'] .doc h2 { border: 0; }
+  [data-layout='galley'] .note { min-height: auto; padding-block: 13px; }
+  [data-layout='galley'] .counter { grid-column: 2; }
+  [data-layout='folio'] .layout { grid-template-columns: 257px 1fr; gap: 38px; }
+  [data-layout='folio'] .rail { grid-row: 1 / span 2; background: var(--olive); color: white; padding: 24px; }
+  [data-layout='folio'] .rail li { color: white; border-color: #9ca48b; }
+  [data-layout='folio'] .rail li[aria-current] { background: var(--paper); color: var(--olive); }
+  [data-layout='folio'] .rail footer { color: white; }
+  [data-layout='folio'] .margin { grid-column: 2; grid-row: 1; }
+  [data-layout='folio'] .margin dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  [data-layout='folio'] .spread { grid-column: 2; grid-row: 2; }
+  @media (max-width: 850px) { .frame { padding: 24px; } .layout, [data-layout='folio'] .layout, [data-layout='galley'] .layout { display: flex; flex-direction: column; } .rail ol { display: flex; flex-wrap: wrap; } .rail footer { display: none; } }
+  @media (max-width: 540px) { .compare { display: block; } .frame { padding: 18px; } .system { display: none; } [data-layout='galley'] .doc { display: block; } }
+</style>
+<div class="frame">
+  <header class="masthead"><strong class="wordmark">relay<span>.</span></strong><span class="meta">By LOTOS</span><span class="meta system">Incident handoff system</span></header>
+  <main class="layout">
+    <nav class="rail" aria-label="Incident workflow"><ol><li>01 / Capture</li><li aria-current="step">02 / Review</li><li>03 / Handoff</li></ol><footer>Private processing.<br />Human judgment.</footer></nav>
+    <section class="spread" aria-labelledby="review-title">
+      <header class="title"><div><span class="meta">Sharing boundary</span><h1 id="review-title">Review the copy.</h1><p>Compare the two versions and decide what may leave this device.</p></div><span class="number" aria-hidden="true">02</span></header>
+      <div class="compare">
+        <article class="doc"><h2>Original · stays on device</h2><pre class="note">10:02 Search timed out at the support desk.
+10:05 Worker restarted.
+10:10 First successful search.
+10:18 Search timed out again.
+Morning config change suspected.
+Contact: <mark>robin@example.test</mark>
+Scratch tag: <mark>RAW-ORCHID</mark></pre><footer class="counter">Private original</footer></article>
+        <article class="doc"><h2>Sharing copy · editable</h2><pre class="note">10:02 Search timed out at the support desk.
+10:05 Worker restarted.
+10:10 First successful search.
+10:18 Search timed out again.
+Morning config change suspected.
+Contact: [removed]
+Scratch tag: [removed]</pre><footer class="counter">Pending review</footer></article>
+      </div>
+      <section class="annotations"><strong>Excluded from sharing copy</strong><p><span class="ref">Line 6</span> Email address <span class="ref">Line 7</span> Synthetic scratch marker</p></section>
+      <div class="actions"><button type="button">Approve this text</button><span class="meta pending">Approval pending</span></div>
+    </section>
+    <aside class="margin" aria-label="Privacy inspector"><h2><span class="square" aria-hidden="true"></span> Privacy inspector</h2><dl><div><dt>Original</dt><dd>Local device only</dd></div><div><dt>Sharing copy</dt><dd>Prepared</dd></div><div><dt>Human approval</dt><dd>Pending</dd></div><div><dt>Cloud inference</dt><dd>Not authorized</dd></div></dl><p>Only an approved snapshot may cross the device boundary.</p></aside>
+  </main>
+  <footer class="status meta">Static design study · synthetic A1</footer>
+</div>
+<script>
+  const layouts = ['spread', 'galley', 'folio'];
+  const requested = new URLSearchParams(location.search).get('layout');
+  document.body.dataset.layout = layouts.includes(requested) ? requested : 'spread';
+</script>
+</html>
