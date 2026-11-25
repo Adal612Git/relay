@@ -1,0 +1,39 @@
+@font-face {
+  font-family: Geist;
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --paper: #f4f3ed;
+  --document: #fff;
+  --ink: #222420;
+  --olive: #747d42;
+  --olive-dark: #414a28;
+  --olive-hover: #30381b;
+  --rule: #d1d2c7;
+  --control-rule: #808477;
+  --muted: #62665b;
+  --yellow: #c7a84a;
+  --warning: #654e14;
+  --warning-paper: #f2e8c6;
+  --privacy-paper: #eaecdf;
+  --success: #31512f;
+  --error: #8e3027;
+  --error-paper: #f5e6de;
+  --sans: Geist, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'Geist Mono', Consolas, monospace;
+  --gutter: clamp(1rem, 3.6vw, 3.75rem);
+  --space: clamp(1rem, 2vw, 2rem);
+  --target: 2.75rem;
+  --measure: 100rem;
+}

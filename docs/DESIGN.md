@@ -1,5 +1,7 @@
 # Design direction
 
+This file records the RC1 Jade direction. The current product design is documented in [LOTOS Editorial](LOTOS-EDITORIAL.md).
+
 The latest Codex design guide selects **Jade editorial** as the working direction: graphite-blue background, flat elevated surfaces, calm reading rhythm, jade for the primary action, violet for source/focus, amber for pending review, and terracotta/red for errors.
 
 The design guide records this direction as awaiting the product owner's complete walkthrough. Treat the tokens as the current implementation reference, not final visual acceptance.

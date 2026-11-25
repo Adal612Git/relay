@@ -1,4 +1,5 @@
 import { expect, test, chromium } from '@playwright/test';
+import { join } from 'node:path';
 import { A1_ORIGINAL } from '../../src/lib/examples';
 
 test('Firebase keeps private analysis offline and prefers Chrome for the approved handoff', async ({
@@ -14,7 +15,9 @@ test('Firebase keeps private analysis offline and prefers Chrome for the approve
         ...testInfo.project.use.launchOptions,
       })
     : null;
-  const page = persistent ? await persistent.newPage() : defaultPage;
+  const page = persistent
+    ? (persistent.pages()[0] ?? (await persistent.newPage()))
+    : defaultPage;
   try {
     const context = page.context();
     let cloudRequests = 0;
@@ -33,16 +36,29 @@ test('Firebase keeps private analysis offline and prefers Chrome for the approve
     await page.goto('/');
     const loadCase = page.getByRole('button', { name: 'Try A1' });
     const analyze = page.getByRole('button', {
-      name: 'Analyze on this device',
+      name: 'Analyze locally',
     });
     const status = page.getByRole('status');
     await loadCase.click();
     await analyze.click();
+    const evidence = process.env.RELAY_EDITORIAL_EVIDENCE_DIR;
+    if (evidence) {
+      await expect(
+        page.getByRole('progressbar', {
+          name: 'Preparing the on-device model',
+        }),
+      ).toBeVisible();
+      await page.screenshot({
+        path: join(evidence, 'real-device-loading.png'),
+        fullPage: true,
+      });
+    }
     await expect(status).toContainText('On-device analysis complete.', {
       timeout: 220_000,
     });
 
     await context.setOffline(true);
+    await page.getByRole('button', { name: 'Capture', exact: true }).click();
     await loadCase.click();
     await analyze.click();
     await expect(status).toContainText('On-device analysis complete.', {
@@ -56,16 +72,31 @@ test('Firebase keeps private analysis offline and prefers Chrome for the approve
     ).not.toHaveValue(/RAW-ORCHID|robin@example\.test/);
     expect(cloudRequests).toBe(0);
     expect(externalRequestsWithPrivateNotes).toBe(0);
+    if (evidence)
+      await page.screenshot({
+        path: join(evidence, 'real-device-offline.png'),
+        fullPage: true,
+      });
 
     await context.setOffline(false);
     await page.getByRole('button', { name: 'Approve this text' }).click();
+    await page
+      .getByRole('button', { name: 'Open handoff', exact: true })
+      .click();
     await page.getByRole('button', { name: 'Generate handoff' }).click();
-    await expect(page.locator('.source-tag')).toHaveText(
-      'Generated on this device',
-      { timeout: 90_000 },
-    );
+    const result = page.locator('.source-tag').filter({ hasText: /Generated/ });
+    const alert = page.getByRole('alert');
+    await expect(result.or(alert)).toBeVisible({ timeout: 90_000 });
+    if (await alert.isVisible())
+      throw new Error((await alert.textContent()) ?? 'Live inference failed');
+    await expect(result).toHaveText('Generated on this device');
     expect(cloudRequests).toBe(0);
     expect(externalRequestsWithPrivateNotes).toBe(0);
+    if (evidence)
+      await page.screenshot({
+        path: join(evidence, 'real-device-handoff.png'),
+        fullPage: true,
+      });
   } finally {
     await persistent?.close();
   }
