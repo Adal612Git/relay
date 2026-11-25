@@ -377,10 +377,8 @@ textarea::placeholder {
 .sample-bar,
 .excluded-box {
   margin: 12px 0;
-  padding: 11px 12px;
-  border: 1px solid var(--divider);
-  border-radius: var(--radius-status);
-  background: #1c2a33;
+  padding-top: 12px;
+  border-top: 1px solid var(--divider);
 }
 
 .sample-bar {
@@ -477,7 +475,7 @@ textarea::placeholder {
 
 .excluded-box ul {
   max-height: 160px;
-  padding: 6px;
+  padding: 6px 6px 6px 5px;
   list-style: none;
   overflow: auto;
 }

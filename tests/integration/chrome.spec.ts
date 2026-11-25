@@ -4,15 +4,14 @@ import { A1_ORIGINAL } from '../../src/lib/examples';
 test('Firebase keeps private analysis offline and prefers Chrome for the approved handoff', async ({
   page: defaultPage,
   baseURL,
-}) => {
+}, testInfo) => {
   const profile = process.env.RELAY_CHROME_TEST_PROFILE;
   const persistent = profile
     ? await chromium.launchPersistentContext(profile, {
         channel: 'chrome',
         headless: false,
         baseURL,
-        args: ['--enable-features=PromptApiForGeminiNanoMultimodalInput'],
-        ignoreDefaultArgs: ['--disable-component-update'],
+        ...testInfo.project.use.launchOptions,
       })
     : null;
   const page = persistent ? await persistent.newPage() : defaultPage;

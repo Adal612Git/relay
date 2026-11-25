@@ -29,6 +29,9 @@ for (const fixture of EXAMPLES) {
         incidentLogged = true;
     });
     await page.goto('/');
+    expect(await page.evaluate(() => 'LanguageModel' in globalThis)).toBe(
+      false,
+    );
     await page.getByRole('button', { name: `Try ${fixture.id}` }).click();
     await page.getByRole('button', { name: 'Prepare manually' }).click();
     const approved = await page

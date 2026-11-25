@@ -1,6 +1,13 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 const staging = process.env.RELAY_INTEGRATION_BASE_URL;
+const chromeFeatures = ['AIPromptAPIMultimodalInput'];
+if (process.env.RELAY_CHROME_MODEL_V4 === '1') {
+  chromeFeatures.push(
+    'OptimizationGuideManifestBroker',
+    'AIApiFoundationalModel:model_version/v4',
+  );
+}
 
 export default defineConfig({
   testDir: './tests/integration',
@@ -18,17 +25,21 @@ export default defineConfig({
     {
       name: 'real-cloud-fallback',
       testMatch: 'firebase.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        channel: 'chrome',
+        headless: false,
+        // Use genuine App Check and make the browser's Prompt API unavailable.
+        launchOptions: { args: ['--disable-blink-features=AIPromptAPI'] },
+      },
     },
     {
       name: 'real-chrome-offline',
       testMatch: 'chrome.spec.ts',
       use: {
-        ...devices['Desktop Chrome'],
         channel: 'chrome',
         headless: false,
         launchOptions: {
-          args: ['--enable-features=PromptApiForGeminiNanoMultimodalInput'],
+          args: [`--enable-features=${chromeFeatures.join(',')}`],
           ignoreDefaultArgs: ['--disable-component-update'],
         },
       },
