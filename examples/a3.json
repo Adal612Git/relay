@@ -1,0 +1,31 @@
+{
+  "id": "A3",
+  "title": "Webhook delivery · uncertain cause and provider failure",
+  "synthetic": true,
+  "originalNotes": [
+    "13:02 Partner webhook deliveries returned HTTP 503 for two synthetic test events.",
+    "13:06 Operator retried one synthetic event; it returned HTTP 202.",
+    "13:09 Partner dashboard still showed the other event as undelivered.",
+    "13:11 Provider status page showed degraded delivery; status may be unrelated.",
+    "13:14 API request to inspect delivery details timed out. No further retry was performed.",
+    "No confirmation that the 202 event was processed downstream.",
+    "Next shift: reconcile event IDs against provider receipts before retrying; avoid duplicate delivery.",
+    "Scratch tag: RAW-LOTOS-TEST",
+    "Keep this out of the handoff: “silver teacup”."
+  ],
+  "expectedHandoff": {
+    "observedImpact": "Two synthetic webhook deliveries returned HTTP 503 at 13:02; at 13:09 the partner dashboard still showed one event as undelivered.",
+    "actionsAndResults": "One synthetic event was retried at 13:06 and returned HTTP 202, which does not confirm downstream processing. A delivery-details API request timed out at 13:14; no further retry occurred.",
+    "openQuestions": "The provider reported degraded delivery at 13:11 but its relationship to this incident is unconfirmed. The downstream status of the HTTP 202 event is unknown.",
+    "nextStep": "Reconcile event IDs against provider receipts before retrying to avoid duplicates."
+  },
+  "expectedExclusions": [
+    "RAW-LOTOS-TEST",
+    "silver teacup"
+  ],
+  "forbiddenClaims": [
+    "Provider degradation caused the failures",
+    "Both events were delivered",
+    "Second event was retried"
+  ]
+}

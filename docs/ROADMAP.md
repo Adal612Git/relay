@@ -1,27 +1,22 @@
 # Delivery roadmap
 
-This roadmap condenses the Relay engineering dossier. Dates are planning targets in Guadalajara time, not proof of completion.
+RC1 is technically ready for evaluation and recording. The public video, competition model-generation evidence, and final submission are tracked in the [Devpost package](DEVPOST-SUBMISSION.md). The [RC1 report](RELEASE-RC1-REPORT.md) records the tested build.
 
-| Workstream | Scope | Exit evidence | Status at scaffold creation |
-|---|---|---|---|
-| B01 / F1 | Firebase proof: local-only response, cloud fallback, App Check, Chrome profile and device readiness. | Two fresh responses from the same build; offline local proof; approved-copy cloud proof; request-body inspection. | Not verified |
-| B02–B03 / F2 | Privacy boundary, approval capability, revision invalidation, stale-response rejection. | Unit tests and request-boundary tests. | Starter code only |
-| B04–B06 / F3 | A1–A3 fixtures, responsive one-view UI, manual recovery, four-field output. | Fidelity review and keyboard/320 px walkthrough. | A1 fixture and initial UI only |
-| B07–B09 / F4 | Integrated tests, privacy inspection, source labels, failure recovery, evaluator access. | Test report with environment, build SHA, and real browser evidence. | Not started |
-| F5 | Compare three manual handoffs with Relay. Measure time, completeness, exclusions, and next-step accuracy. | Results with sample size and method. | Not started |
-| B10 / F6 | Clean checkout, lockfile, public license, English README, reproducible build. | Fresh installation and successful build from a clean session. | Scaffold being prepared |
-| B11 | Record a real demo of local inference, approval, cloud fallback, and output review. | Public video, up to three minutes, English audio or subtitles. | Not started |
-| B12 / F7 | Verify links, complete Devpost, submit, and confirm receipt. | Devpost submission confirmation and retained commit SHA. | Not started |
+| Workstream | Status | Evidence or remaining step |
+| --- | --- | --- |
+| B01 / F1 | Verified | Chrome on-device inference, offline analysis, hybrid cloud fallback and real App Check. The competition’s exact browser model generation is tracked separately. |
+| B02–B03 / F2 | Verified | Revocable approval, approved-only cloud payload, stale-response protection and deterministic redaction tests. |
+| B04–B06 / F3 | Verified | A1–A3 canonical fixtures, polished responsive workspace, manual recovery and editable four-field handoff. |
+| B07–B09 / F4 | Verified | Public free evaluator preview, live A1–A3 and device tests, browser accessibility checks, and green technical CI. |
+| F5 | Unmeasured | No comparative timing study has been completed. The submission describes the workflow without a quantified efficiency claim. |
+| B10 / F6 | Ready | Public Apache 2.0 repository, lockfile, English instructions and reproducible build on the RC1 branch. |
+| B11 | Ready to record | The real 2:40 walkthrough is scripted. Record it and publish the English video on YouTube. |
+| B12 / F7 | Awaiting publication | Confirm requirements, add the YouTube link, obtain owner sign-off, submit and retain the receipt. |
 
-## Internal target sequence
+## Submission dates
 
-- 23 Nov: input and local extraction.
-- 24 Nov: human review, redaction, and approval invalidation.
-- 25 Nov: hybrid generation using approved text only.
-- 26 Nov: measure and correct three cases.
-- 27 Nov: reproducible release candidate.
-- 28 Nov: public demo video.
-- 29 Nov, 18:00: internal submission target.
-- 30 Nov, 16:00: official deadline recorded in the project planning document. Reconfirm the live Devpost deadline before submission.
+- The optional internal target is November 29 at 18:00 Guadalajara.
+- Submissions close November 30 at 14:00 PST / 16:00 Guadalajara. [Official deadline](https://firebasehybridaihackathon.devpost.com/details/dates)
+- Judging ends December 16 at 14:00 PST / 16:00 Guadalajara. The evaluator preview expires December 24. [Official judging dates](https://firebasehybridaihackathon.devpost.com/details/dates) · [Evaluator preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/)
 
-A privacy leak or an invented factual claim blocks acceptance of the affected flow.
+A confirmed privacy leak or invented factual claim blocks acceptance of the affected workflow.

@@ -18,5 +18,13 @@
     "openQuestions": "The morning config change is suspected. The change record has not been checked.",
     "nextStep": "Compare worker errors at 10:02 and 10:18 with the change record."
   },
-  "expectedExclusions": ["robin@example.test", "RAW-ORCHID"]
+  "expectedExclusions": [
+    "robin@example.test",
+    "RAW-ORCHID"
+  ],
+  "forbiddenClaims": [
+    "The config change caused the timeouts",
+    "Search was permanently restored",
+    "The change record was checked"
+  ]
 }

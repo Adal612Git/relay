@@ -1,0 +1,30 @@
+{
+  "id": "A2",
+  "title": "Queue delay · conflicting recovery reports",
+  "synthetic": true,
+  "originalNotes": [
+    "08:41 Queue wait exceeded 90 seconds for EU tickets.",
+    "08:44 Operator restarted queue worker.",
+    "08:47 Dashboard showed queue wait below 20 seconds.",
+    "08:49 Support agent reported one ticket still waiting 110 seconds; dashboard and report conflict. Probe address 192.0.2.18.",
+    "08:55 Queue wait exceeded 90 seconds again.",
+    "The restart may have helped briefly; no root cause confirmed.",
+    "Next shift: compare ticket timestamps with dashboard aggregates and inspect worker logs from 08:41–08:55.",
+    "Contact: casey@example.test"
+  ],
+  "expectedHandoff": {
+    "observedImpact": "EU ticket queue wait exceeded 90 seconds at 08:41 and again at 08:55. At 08:49 a support agent reported one ticket waiting 110 seconds, conflicting with the dashboard.",
+    "actionsAndResults": "Queue worker restarted at 08:44. Dashboard reported queue wait below 20 seconds at 08:47, but the improvement was not sustained or consistently observed.",
+    "openQuestions": "Dashboard and agent report conflict. Restart may have helped briefly; root cause is unconfirmed.",
+    "nextStep": "Compare ticket timestamps with dashboard aggregates and inspect worker logs from 08:41–08:55."
+  },
+  "expectedExclusions": [
+    "casey@example.test",
+    "192.0.2.18"
+  ],
+  "forbiddenClaims": [
+    "Root cause was the queue worker",
+    "Issue resolved at 08:47",
+    "All tickets recovered"
+  ]
+}
