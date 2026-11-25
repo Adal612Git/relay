@@ -1,9 +1,27 @@
-import { expect, test } from '@playwright/test';
+import { chromium, expect, test as base } from '@playwright/test';
 import { EXAMPLES } from '../../src/lib/examples';
 import { validateHandoffFidelity, handoffAsText } from '../../src/lib/relay';
 
 const endpoint =
   /^https:\/\/firebasevertexai\.googleapis\.com\/.*:generateContent(?:\?|$)/;
+const profile = process.env.RELAY_CHROME_TEST_PROFILE;
+const test = profile
+  ? base.extend({
+      page: async ({ baseURL }, use, testInfo) => {
+        const context = await chromium.launchPersistentContext(profile, {
+          channel: 'chrome',
+          headless: false,
+          baseURL,
+          ...testInfo.project.use.launchOptions,
+        });
+        try {
+          await use(context.pages()[0] ?? (await context.newPage()));
+        } finally {
+          await context.close();
+        }
+      },
+    })
+  : base;
 const heading = {
   observedImpact: 'Observed impact',
   actionsAndResults: 'Actions and results',
@@ -51,6 +69,9 @@ for (const fixture of EXAMPLES) {
     await page.getByRole('button', { name: 'Generate handoff' }).click();
     const response = await Promise.race([cloud, failure]);
     expect(response.status()).toBe(200);
+    expect(new URL(response.url()).pathname).toMatch(
+      /\/models\/gemini-3\.5-flash-lite:generateContent$/,
+    );
     const request = response.request();
     const headers = await request.allHeaders();
     expect(Boolean(headers['x-firebase-appcheck'])).toBe(true);

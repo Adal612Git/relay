@@ -2,13 +2,17 @@ import { loadEnv } from 'vite';
 
 const staging = process.env.RELAY_INTEGRATION_BASE_URL;
 if (staging) {
-  if (new URL(staging).protocol !== 'https:') {
-    console.error('BLOCKED: the Firebase staging test origin must use HTTPS.');
+  const { protocol, hostname } = new URL(staging);
+  const localPreview =
+    protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
+  if (protocol !== 'https:' && !localPreview) {
+    console.error(
+      'BLOCKED: the Firebase integration origin must use HTTPS or HTTP on loopback.',
+    );
     process.exit(2);
   }
-  console.log(
-    'Using the supplied HTTPS staging origin for real Firebase integration.',
-  );
+  console.log('Using the supplied origin for real Firebase integration.');
   process.exit(0);
 }
 
