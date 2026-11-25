@@ -1,6 +1,6 @@
 # Devpost submission package
 
-**Relay by Lotos** is a Web / Chrome entry. Technical RC1 is verified. Confirmation of the on-device model generation, the public YouTube link and submission approval remain open.
+**Relay by Lotos** is a Web / Chrome entry. The final local build completed real inference with the Chrome v4 Gemma 4 component and with Firebase cloud fallback. The public YouTube link, final evaluator preview and submission approval remain open. [Final release evidence](FINAL-RELEASE-REPORT.md)
 
 [Evaluator preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · [Public source on release/relay-rc1](https://github.com/Adal612Git/relay/tree/release/relay-rc1) · [English demo script](DEMO-SCRIPT.md) · [RC1 evidence](RELEASE-RC1-REPORT.md)
 
@@ -35,8 +35,8 @@ The hosted preview expires on December 24, 2026, after the judging period ends. 
 - [x] Public GitHub source, Apache 2.0 license, working hosted preview and evaluator instructions. [License](../LICENSE)
 - [x] English description with the product workflow, Firebase AI Logic integration, value proposition and work completed during the submission period.
 - [x] Technical evidence for device-only offline analysis, both hybrid sources, App Check, exact approved payloads and A1–A3. [Technical CI](https://github.com/Adal612Git/relay/actions/runs/45384128619) · [RC1 evidence](RELEASE-RC1-REPORT.md)
-- [ ] Confirm the specific Gemini Nano 4 model generation for the Web / Chrome entry. The successful tests establish on-device execution in Chrome. The SDK’s `inferenceSource` identifies where inference ran, and the evidence currently available does not identify the model generation. [Web configuration](https://firebase.google.com/docs/ai-logic/hybrid/web/configuration-options) · [Official rules, §6](https://firebasehybridaihackathon.devpost.com/rules)
-  A separate Chrome 158 profile requested the v4 foundation model. Its model manifest listed gemma4_component, and the Firebase analysis timed out after 105 seconds during model setup. This attempt did not produce a response that can establish the generation. [Chromium flag for Chrome 158](https://github.com/chromium/chromium/blob/158.0.8127.88/chrome/browser/about_flags.cc)
+- [x] Confirm the v4 model generation in the recording browser. Chrome 158 reported `gemma4_component` version `2026.11.3.1140` in On-Device Internals. The same profile completed the final build’s offline Firebase analysis and generated a handoff with SDK metadata `ON_DEVICE`. [Final release evidence](FINAL-RELEASE-REPORT.md) · [Official rules, §6](https://firebasehybridaihackathon.devpost.com/rules)
+- [ ] Verify cloud generation from a fresh evaluator browser at the public URL. The existing URL serves RC1. The final Hosting artifact is prepared for an authorized deployment. [Final release evidence](FINAL-RELEASE-REPORT.md)
 - [ ] Record the real workflow in English or add English subtitles, keep the cut at or below three minutes, and paste its public YouTube link into Devpost. Check the video from a signed-out browser. [2:40 demo script](DEMO-SCRIPT.md)
 - [ ] Confirm the entrant or team representation and disclose applicable pre-existing assets and third-party materials. Check the final form, video and screenshots for customer data, credentials and unpublished material.
 - [ ] Obtain the owner’s submission approval, submit before November 30 at 14:00 PST / 16:00 Guadalajara, and save the confirmation with the final source link. [Official rules](https://firebasehybridaihackathon.devpost.com/rules) · [Official deadline](https://firebasehybridaihackathon.devpost.com/details/dates)

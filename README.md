@@ -4,7 +4,7 @@
 
 Relay is a browser-based incident workspace for technical support and operations teams. It helps an outgoing operator preserve the timeline, distinguish facts from hypotheses, remove information from a sharing copy, and prepare a concise handoff for the next shift.
 
-> **RC1 is ready for technical evaluation.** Chrome offline analysis, hybrid inference on device and in the cloud, and App Check were exercised against real Firebase services. [Open the free Firebase Hosting preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/) · [Release evidence](docs/RELEASE-RC1-REPORT.md)
+> **The final build is verified for local demo recording.** Chrome offline analysis, both inference sources and App Check passed on the final local build. The existing Firebase Hosting preview serves RC1. [Final release evidence](docs/FINAL-RELEASE-REPORT.md) · [Open the RC1 preview](https://relay-by-lotos--rc1-2uvff4zh.web.app/)
 
 ## Why Relay
 
