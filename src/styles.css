@@ -239,7 +239,7 @@ button:disabled {
   color: var(--success);
 }
 [data-approval='revoked'] {
-  color: var(--warning);
+  color: var(--error);
 }
 .incident-document {
   min-width: 0;
