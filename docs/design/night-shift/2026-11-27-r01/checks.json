@@ -1,0 +1,52 @@
+{
+  "browser": "141.0.7390.37",
+  "checks": [
+    "1366x768: pending approval CTA visible",
+    "Keyboard: line reference focuses and selects readonly original",
+    "1366x768: approved handoff CTA visible",
+    "Editing revokes approval and removes Open handoff",
+    "Revoked state uses the same error color in inspector and approval strip",
+    "Review 320px: no horizontal overflow",
+    "Review 624px: no horizontal overflow",
+    "Review 625px: no horizontal overflow",
+    "Review 928px: no horizontal overflow",
+    "Review 929px: no horizontal overflow",
+    "Review 1120px: no horizontal overflow",
+    "Review 1121px: no horizontal overflow",
+    "320px: 12px separation between documents",
+    "Empty exclusions 320px: no horizontal overflow",
+    "Empty exclusions 320px: zero axe violations",
+    "Invalid sharing copy 320px: no horizontal overflow",
+    "Invalid sharing copy 320px: zero axe violations",
+    "Forced colors: invalid sharing copy retains visible 2px keyboard focus"
+  ],
+  "measurements": {
+    "pendingButtonBottom": 741.3125,
+    "approvedButtonBottom": 741.3125,
+    "revokedTextColors": [
+      "rgb(142, 48, 39)",
+      "rgb(142, 48, 39)"
+    ],
+    "mobileDocumentGap": "12px",
+    "forcedColorsInvalidFocus": {
+      "width": "2px",
+      "style": "solid",
+      "color": "rgba(5, 0, 73, 0.8)",
+      "offset": "-3px"
+    }
+  },
+  "status": "passed",
+  "contrast": {
+    "ink/original": 14.597,
+    "olive/privacy": 7.858,
+    "muted/privacy": 4.918,
+    "warning/warning-paper": 6.458,
+    "error/privacy": 6.749,
+    "success/privacy": 7.478,
+    "control/privacy": 3.202,
+    "yellow/warning-paper": 1.877
+  },
+  "baseline_sha": "f795eaaf28a2ff38db6b701b4d4fd3ce5470c109",
+  "final_visual_sha": "b5c7a8f4c814e6523609be281ed4e17daa7ba660",
+  "firebase_integration": "BLOCKED: missing VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_APP_ID, VITE_RECAPTCHA_ENTERPRISE_SITE_KEY; preflight exit2; no request sent."
+}
