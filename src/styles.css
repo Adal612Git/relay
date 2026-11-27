@@ -400,6 +400,24 @@ button:disabled {
 .comparison textarea {
   height: 13.5rem;
 }
+.comparison .incident-document:has(#private-original) {
+  background: var(--paper);
+  border-top-color: var(--control-rule);
+}
+.comparison #private-original {
+  background: #f8f7f2;
+}
+.comparison .incident-document:has(#sharing-copy) {
+  border-top-color: var(--olive-dark);
+}
+.comparison .incident-document:has(#sharing-copy) .document-heading {
+  background: var(--privacy-paper);
+  border-bottom-color: var(--control-rule);
+}
+.comparison .incident-document:has(#sharing-copy) .document-heading label,
+.comparison .incident-document:has(#sharing-copy) .document-heading .meta {
+  color: var(--olive-dark);
+}
 .annotations {
   padding-block: 0.875rem;
 }
@@ -412,9 +430,12 @@ button:disabled {
   color: var(--muted);
 }
 .annotations > p {
-  color: var(--muted);
+  color: var(--warning);
   font-size: 0.875rem;
   margin-top: 0.35rem;
+  padding: 0.5rem 0.625rem;
+  border-inline-start: 3px solid var(--yellow);
+  background: var(--warning-paper);
 }
 .annotations > ul {
   padding: 0;
@@ -479,8 +500,9 @@ button:disabled {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
-  border-top: 1px solid var(--rule);
-  padding-top: 0.875rem;
+  border-top: 1px solid var(--control-rule);
+  padding: 0.625rem 0.875rem;
+  background: var(--privacy-paper);
 }
 .review-action > div:first-child {
   flex: 1 1 14rem;
@@ -498,6 +520,10 @@ button:disabled {
 .approval-state[data-approval='approved'] {
   color: var(--success);
   border-color: var(--success);
+}
+.approval-state[data-approval='revoked'] {
+  color: var(--error);
+  border-color: var(--error);
 }
 .generation-bar {
   display: flex;
@@ -725,6 +751,10 @@ progress {
   }
   .comparison .incident-document + .incident-document {
     border-left: 0;
+    margin-top: 0.75rem;
+  }
+  .review-action {
+    padding-inline: 0.625rem;
   }
   .handoff-section {
     grid-template-columns: 1.5rem minmax(0, 1fr);
